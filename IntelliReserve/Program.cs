@@ -1,9 +1,6 @@
-<<<<<<< HEAD
-=======
 using IntelliReserve.Data;
 using Microsoft.EntityFrameworkCore;
 
->>>>>>> 4370e17386555479c0ddd199dab0d915d825e24d
 namespace IntelliReserve
 {
     public class Program
@@ -12,13 +9,10 @@ namespace IntelliReserve
         {
             var builder = WebApplication.CreateBuilder(args);
 
-<<<<<<< HEAD
-=======
             // 💡 Conexión a PostgreSQL con EF Core
             builder.Services.AddDbContext<AppDbContext>(options =>
                 options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
->>>>>>> 4370e17386555479c0ddd199dab0d915d825e24d
             // Add services to the container.
             builder.Services.AddControllersWithViews();
 
@@ -28,10 +22,6 @@ namespace IntelliReserve
             if (!app.Environment.IsDevelopment())
             {
                 app.UseExceptionHandler("/Home/Error");
-<<<<<<< HEAD
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-=======
->>>>>>> 4370e17386555479c0ddd199dab0d915d825e24d
                 app.UseHsts();
             }
 

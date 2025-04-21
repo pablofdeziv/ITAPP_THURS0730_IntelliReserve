@@ -2,13 +2,12 @@ using System;
 
 namespace IntelliReserve.Models
 {
-    public class Service
+    public class Employee
     {
         public int Id { get; set; }
         public Guid BusinessId { get; set; }
         public string Name { get; set; }
-        public int Duration { get; set; }
-        public decimal Price { get; set; }
+        public string Role { get; set; }
 
         public Business Business { get; set; }
     }
