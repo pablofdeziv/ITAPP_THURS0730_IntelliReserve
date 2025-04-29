@@ -39,6 +39,14 @@ namespace IntelliReserve.Controllers
             return View();
         }
 
+        [HttpGet]
+        public IActionResult RegisterCustomer()
+        {
+            return View("~/Views/Account/RegisterCustomer.cshtml"); // Redirige a la vista de registro
+        }
+
+
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Name,Email,Password,Role")] User user)
@@ -90,6 +98,14 @@ namespace IntelliReserve.Controllers
             _context.Users.Remove(user);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
+        }
+
+
+        [HttpGet]
+        public IActionResult Login()
+        {
+            return View("~/Views/Account/Login.cshtml");
+
         }
     }
 }
