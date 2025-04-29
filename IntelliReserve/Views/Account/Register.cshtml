@@ -1,0 +1,72 @@
+﻿@model IntelliReserve.Models.ViewModels.RegisterViewModel
+
+@{
+    ViewData["Title"] = "Create Account";
+}
+
+<div class="min-h-screen flex items-center justify-center bg-gray-100">
+    <div class="bg-white p-8 rounded-2xl shadow-lg w-full max-w-md">
+
+        <!-- Logo -->
+        <div class="flex justify-center mb-6">
+            <img src="~/images/logo.png" alt="IntelliReserve" class="h-14" />
+        </div>
+
+        <!-- Título -->
+        <h2 class="text-3xl font-bold text-center mb-8">Create Your Account</h2>
+
+        <!-- Formulario -->
+        <form asp-action="Register" method="post" class="space-y-6">
+            <!-- Full Name -->
+            <div>
+                <label asp-for="Name" class="block text-gray-700 font-semibold mb-2">User Name</label>
+                <input asp-for="Name" class="w-full border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400" placeholder="Enter your name" />
+                <span asp-validation-for="Name" class="text-red-500 text-sm"></span>
+            </div>
+
+            <!-- Email -->
+            <div>
+                <label asp-for="Email" class="block text-gray-700 font-semibold mb-2">Email</label>
+                <input asp-for="Email" class="w-full border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400" placeholder="Enter your email" />
+                <span asp-validation-for="Email" class="text-red-500 text-sm"></span>
+            </div>
+
+            <!-- Password -->
+            <div>
+                <label asp-for="Password" class="block text-gray-700 font-semibold mb-2">Password</label>
+                <input asp-for="Password" type="password" class="w-full border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400" placeholder="Create a password" />
+                <span asp-validation-for="Password" class="text-red-500 text-sm"></span>
+            </div>
+
+            <!-- Role -->
+            <div>
+                <label asp-for="Role" class="block text-gray-700 font-semibold mb-2">Role</label>
+                <select asp-for="Role" class="w-full border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400">
+                    <option value="">Select a role</option>
+                    <option value="Customer">Customer</option>
+                    <option value="BusinessAdmin">Business Admin</option>
+                </select>
+                <span asp-validation-for="Role" class="text-red-500 text-sm"></span>
+            </div>
+
+            <!-- Botón -->
+            <button type="submit" class="w-full bg-yellow-400 text-white font-bold py-3 rounded-lg hover:bg-yellow-500 transition-all">
+                Register
+            </button>
+        </form>
+
+        <!-- Link para Login -->
+        <div class="text-center mt-6">
+            <a href="@Url.Action("Login", "Account")" class="text-sm text-blue-600 hover:underline">
+                Already have an account? Log in
+            </a>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
