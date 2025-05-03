@@ -1,5 +1,5 @@
 ﻿@{
-    ViewData["Title"] = "Register Customer";
+    ViewData["Title"] = "Register Business";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
@@ -66,8 +66,10 @@
         width: 67%;
         display: flex;
         justify-content: center;
-        align-items: center;
+        align-items: flex-start;
         padding: 3rem;
+        overflow: auto;
+        max-height: calc(100vh - 56px);
     }
 
     .register-box {
@@ -120,7 +122,7 @@
     <!-- Panel derecho -->
     <div class="form-panel">
         <div class="register-box">
-            <h4 class="mb-4 text-center">Register Customer</h4>
+            <h4 class="mb-4 text-center">Register Business</h4>
             <form asp-action="RegisterCustomer" method="post">
                 <div class="mb-3">
                     <label for="Name" class="form-label">Name</label>
@@ -136,6 +138,28 @@
                     <label for="Password" class="form-label">Password</label>
                     <input type="password" class="form-control" id="Password" name="Password" placeholder="Enter your password" required />
                 </div>
+
+                <div class="mb-4">
+                    <label for="OrganizationName" class="form-label">Organization Name</label>
+                    <input type="text" class="form-control" id="OrganizationName" name="OrganizationName" placeholder="Enter your  Organization name" required />
+                </div>
+
+                <div class="mb-4">
+                    <label for="Adress" class="form-label">Adress</label>
+                    <input type="text" class="form-control" id="Adress" name="Adress" placeholder="Enter your Adress Organization" required />
+                </div>
+
+                <div class="mb-4">
+                    <label for="Phone" class="form-label">Phone</label>
+                    <input type="tel" class="form-control" id="Phone" name="Phone" placeholder="Enter a Contact number" required />
+                </div>
+
+                <div class="mb-4">
+                    <label for="Description" class="form-label">Description</label>
+                    <textarea class="form-control" id="Description" name="Description" rows="4" placeholder="What is your business about?" required></textarea>
+                </div>
+
+
 
                 <button type="submit" class="btn btn-yellow w-100 mb-3">Register</button>
             </form>

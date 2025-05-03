@@ -1,6 +1,7 @@
 using IntelliReserve.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
+using System.Security.Principal;
 
 namespace IntelliReserve.Controllers
 {
@@ -28,5 +29,34 @@ namespace IntelliReserve.Controllers
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
+
+
+        [Route("login")]
+        [HttpGet]
+        public IActionResult Login()
+        {
+            return View("~/Views/Account/login.cshtml");
+
+        }
+
+
+        [Route("register-customer")]
+        [HttpGet]
+        public IActionResult RegisterCustomer()
+        {
+            return View("~/Views/Account/RegisterCustomer.cshtml"); // Redirige a la vista de registro
+
+        }
+
+        [Route("register-business")]
+        [HttpGet]
+        public IActionResult RegisterBusiness()
+        {
+            return View("~/Views/Account/ResgisterBusiness.cshtml"); // Redirige a la vista de registro
+        
+
+        }
     }
+
+
 }

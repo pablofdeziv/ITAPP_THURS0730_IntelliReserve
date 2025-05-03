@@ -39,6 +39,8 @@ namespace IntelliReserve.Controllers
             return View();
         }
 
+
+        
         [HttpGet]
         public IActionResult RegisterCustomer()
         {
@@ -101,11 +103,6 @@ namespace IntelliReserve.Controllers
         }
 
 
-        [HttpGet]
-        public IActionResult Login()
-        {
-            return View("~/Views/Account/Login.cshtml");
-
-        }
+        
     }
 }
