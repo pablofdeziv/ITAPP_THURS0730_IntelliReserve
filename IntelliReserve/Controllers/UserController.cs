@@ -102,7 +102,16 @@ namespace IntelliReserve.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        [Route("profile-customer")]
+        [HttpGet]
+        public IActionResult RegisterBusiness()
+        {
+            return View("~/Views/Profile/ProfileCustomer.cshtml"); // Redirige a la vista Perfil Customer
 
-        
+
+        }
+
+
+
     }
 }
