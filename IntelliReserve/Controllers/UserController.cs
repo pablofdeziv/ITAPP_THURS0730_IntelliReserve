@@ -2,6 +2,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using IntelliReserve.Data;
 using IntelliReserve.Models;
+using IntelliReserve.Models.ViewModels;
+
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 namespace IntelliReserve.Controllers
 {
@@ -46,6 +51,38 @@ namespace IntelliReserve.Controllers
         {
             return View("~/Views/Account/RegisterCustomer.cshtml"); // Redirige a la vista de registro
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RegisterCustomer(RegisterViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == model.Email);
+            if (existingUser != null)
+            {
+                ModelState.AddModelError("Email", "Email is already in use.");
+                return View(model);
+            }
+
+            var newUser = new User
+            {
+                Name = model.Name,
+                Email = model.Email,
+                Password = model.Password, // Reemplazar con hash en producción
+                Role = UserRole.Customer
+            };
+
+            _context.Users.Add(newUser);
+            await _context.SaveChangesAsync();
+
+            // Redirige a la vista de login después del registro
+            return RedirectToAction("Login", "User");
+        }
+
 
 
 
@@ -102,7 +139,51 @@ namespace IntelliReserve.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        [HttpGet]
+        public IActionResult Login()
+        {
+            return View("~/Views/Account/Login.cshtml");
+        }
 
-        
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Login(LoginViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var user = await _context.Users
+                .FirstOrDefaultAsync(u => u.Email == model.Email && u.Password == model.Password);
+
+            if (user == null)
+            {
+                ModelState.AddModelError(string.Empty, "Credenciales inválidas.");
+                return View(model);
+            }
+
+            var claims = new List<Claim>
+    {
+        new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+        new Claim(ClaimTypes.Name, user.Name),
+        new Claim(ClaimTypes.Email, user.Email),
+        new Claim(ClaimTypes.Role, user.Role.ToString())
+    };
+
+            var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            var principal = new ClaimsPrincipal(identity);
+
+            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
+
+            return RedirectToAction("Index", "Home");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Logout()
+        {
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            return RedirectToAction("Login");
+        }
     }
 }

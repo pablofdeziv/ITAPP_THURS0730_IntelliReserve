@@ -1,4 +1,6 @@
-﻿@{
+﻿@model IntelliReserve.Models.ViewModels.RegisterViewModel
+
+@{
     ViewData["Title"] = "Register Customer";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
@@ -11,11 +13,11 @@
         margin: 0;
         font-family: 'Segoe UI', sans-serif;
         background-color: #ffffff;
-        overflow: hidden; /* impide el scroll vertical */
+        overflow: hidden;
     }
 
     .register-wrapper {
-        height: calc(100vh - 56px); /* ajusta si tu navbar tiene otra altura */
+        height: calc(100vh - 56px);
         display: flex;
         flex-direction: row;
     }
@@ -101,6 +103,10 @@
             background-color: #e0b200;
             color: #000;
         }
+
+    .text-danger {
+        font-size: 0.875rem;
+    }
 </style>
 
 <div class="register-wrapper">
@@ -121,20 +127,27 @@
     <div class="form-panel">
         <div class="register-box">
             <h4 class="mb-4 text-center">Register Customer</h4>
-            <form asp-action="RegisterCustomer" method="post">
+
+            <!-- ✅ Cambiado: agregamos asp-controller explícitamente -->
+            <form asp-controller="User" asp-action="RegisterCustomer" method="post">
+                @Html.AntiForgeryToken()
+
                 <div class="mb-3">
-                    <label for="Name" class="form-label">Name</label>
-                    <input type="text" class="form-control" id="Name" name="Name" placeholder="Enter your full name" required />
+                    <label asp-for="Name" class="form-label"></label>
+                    <input asp-for="Name" class="form-control" placeholder="Enter your full name" />
+                    <span asp-validation-for="Name" class="text-danger"></span>
                 </div>
 
                 <div class="mb-3">
-                    <label for="Email" class="form-label">Email</label>
-                    <input type="email" class="form-control" id="Email" name="Email" placeholder="Enter your email address" required />
+                    <label asp-for="Email" class="form-label"></label>
+                    <input asp-for="Email" class="form-control" placeholder="Enter your email address" />
+                    <span asp-validation-for="Email" class="text-danger"></span>
                 </div>
 
                 <div class="mb-4">
-                    <label for="Password" class="form-label">Password</label>
-                    <input type="password" class="form-control" id="Password" name="Password" placeholder="Enter your password" required />
+                    <label asp-for="Password" class="form-label"></label>
+                    <input asp-for="Password" class="form-control" type="password" placeholder="Enter your password" />
+                    <span asp-validation-for="Password" class="text-danger"></span>
                 </div>
 
                 <button type="submit" class="btn btn-yellow w-100 mb-3">Register</button>
@@ -142,3 +155,7 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
