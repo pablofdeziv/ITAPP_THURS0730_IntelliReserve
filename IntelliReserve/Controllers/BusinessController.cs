@@ -99,39 +99,47 @@ namespace IntelliReserve.Controllers
         {
             return View();
         }
-/*
+
         [HttpPost]
-        public async Task<IActionResult> RegisterBusiness(RegisterBusinessViewModel model)
+        public async Task<IActionResult> RegisterWithUser(RegisterBusinessViewModel model)
         {
             if (!ModelState.IsValid)
-                return View(model);
+                return View("Register", model);
 
-            // 1. Crear el usuario propietario
+            // Verificamos que no exista ya el email
+            var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == model.Email);
+            if (existingUser != null)
+            {
+                ModelState.AddModelError("Email", "This email is already in use.");
+                return View("Register", model);
+            }
+
+            // Creamos el usuario
             var user = new User
             {
-                Id = Guid.NewGuid(),
                 Name = model.Name,
                 Email = model.Email,
-                Password = model.Password // ⚠️ Encripta esto en producción
+                Password = model.Password // ⚠️ Considera hashear esta contraseña
             };
 
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
-            // 2. Crear el negocio
+            // Creamos el negocio
             var business = new Business
             {
                 Name = model.OrganizationName,
+                OwnerId = user.Id,
                 Address = model.Address,
                 Phone = model.Phone,
-                Description = model.Description,
-                OwnerId = user.Id
+                Description = model.Description
             };
-
+                
             _context.Businesses.Add(business);
             await _context.SaveChangesAsync();
 
             return RedirectToAction("Login", "User");
-        }*/
+        }
+
     }
 }
