@@ -63,6 +63,15 @@ namespace IntelliReserve.Controllers
             return View("~/Views/Home/AdminHome.cshtml"); // Redirige a la vista de registro
 
         }
+
+        [Route("profile-customer")]
+        [HttpGet]
+        public IActionResult ProfileCustomer()
+        {
+            return View("~/Views/Profile/ProfileCustomer.cshtml"); // Redirige a la vista de registro
+
+        }
+
     }
 
 
