@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using IntelliReserve.Data;
 using IntelliReserve.Models;
@@ -93,5 +93,45 @@ namespace IntelliReserve.Controllers
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
+
+        [HttpGet]
+        public IActionResult RegisterBusiness()
+        {
+            return View();
+        }
+/*
+        [HttpPost]
+        public async Task<IActionResult> RegisterBusiness(RegisterBusinessViewModel model)
+        {
+            if (!ModelState.IsValid)
+                return View(model);
+
+            // 1. Crear el usuario propietario
+            var user = new User
+            {
+                Id = Guid.NewGuid(),
+                Name = model.Name,
+                Email = model.Email,
+                Password = model.Password // ⚠️ Encripta esto en producción
+            };
+
+            _context.Users.Add(user);
+            await _context.SaveChangesAsync();
+
+            // 2. Crear el negocio
+            var business = new Business
+            {
+                Name = model.OrganizationName,
+                Address = model.Address,
+                Phone = model.Phone,
+                Description = model.Description,
+                OwnerId = user.Id
+            };
+
+            _context.Businesses.Add(business);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("Login", "User");
+        }*/
     }
 }

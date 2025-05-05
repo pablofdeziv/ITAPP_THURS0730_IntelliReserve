@@ -16,7 +16,6 @@ namespace IntelliReserve.Models.ViewModels
         [DataType(DataType.Password)]
         public string Password { get; set; }
 
-        [Required]
         public UserRole? Role { get; set; }
     }
 }
