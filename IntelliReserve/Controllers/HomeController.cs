@@ -53,7 +53,14 @@ namespace IntelliReserve.Controllers
         public IActionResult RegisterBusiness()
         {
             return View("~/Views/Account/ResgisterBusiness.cshtml"); // Redirige a la vista de registro
-        
+       
+        }
+
+        [Route("home-business")]
+        [HttpGet]
+        public IActionResult HomeBusiness()
+        {
+            return View("~/Views/Home/AdminHome.cshtml"); // Redirige a la vista de registro
 
         }
     }
