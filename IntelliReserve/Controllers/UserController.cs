@@ -171,12 +171,22 @@ namespace IntelliReserve.Controllers
                 new Claim(ClaimTypes.Role, user.Role.ToString())
             };
 
+            Console.Write(user.Role.ToString());
+
             var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
             var principal = new ClaimsPrincipal(identity);
 
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
 
-            return RedirectToAction("CustomerHome", "Home");
+            if(user.Role == 0)
+            {
+                return RedirectToAction("CustomerHome", "Home");
+            }
+            else
+            {
+                return RedirectToAction("HomeBusiness", "Home");
+
+            }
         }
 
         [HttpPost]
