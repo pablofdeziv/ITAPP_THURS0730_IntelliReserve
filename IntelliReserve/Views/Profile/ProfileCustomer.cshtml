@@ -1,4 +1,5 @@
-﻿@{
+﻿@model IntelliReserve.Models.ViewModels.RegisterViewModel
+@{
     ViewData["Title"] = "User Profile";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
@@ -11,24 +12,23 @@
         font-family: 'Segoe UI', sans-serif;
         background-color: #f9f9f9;
         color: #333;
-        padding-top: 80px; /* Añadir espacio para que no quede cubierto por el navbar */
+        padding-top: 80px;
     }
 
-    /* Asegura que el navbar ocupe todo el ancho de la pantalla */
     .navbar-custom {
         background-color: #fff9db;
-        padding: 1rem 0; /* Ajusta el relleno horizontal a 0 */
+        padding: 1rem 0;
         border-bottom: 1px solid #ddd;
-        width: 100%; /* Asegura que el navbar ocupe todo el ancho */
-        position: fixed; /* Fijar el navbar al principio */
+        width: 100%;
+        position: fixed;
         top: 0;
         left: 0;
-        z-index: 1000; /* Asegura que esté por encima de otros contenidos */
+        z-index: 1000;
     }
 
         .navbar-custom .container-fluid {
             padding-left: 0;
-            padding-right: 0; /* Elimina los márgenes horizontales del contenedor */
+            padding-right: 0;
         }
 
         .navbar-custom .navbar-nav {
@@ -55,12 +55,10 @@
         font-weight: 500;
     }
 
-    /* Ajustes para el contenido, añadiendo margen superior */
     .profile-section {
         padding: 2rem;
-        margin-top: 80px; /* Añadir margen superior suficiente para el navbar fijo */
+        margin-top: 80px;
     }
-
 
     .section-title {
         font-size: 2.5rem;
@@ -68,7 +66,6 @@
         margin: 2rem 0;
         text-align: center;
     }
-
 
     .card {
         border-radius: 1rem;
@@ -125,24 +122,28 @@
         <div class="col-md-4">
             <div class="card p-4">
                 <h5 class="card-title">Personal Information</h5>
-                <form>
+                <form asp-action="UpdateProfile" method="post">
                     <div class="mb-3">
-                        <label for="name" class="form-label">Name</label>
-                        <input type="text" class="form-control" id="name" value="Alex Johnson">
+                        <label asp-for="Name" class="form-label"></label>
+                        <input asp-for="Name" class="form-control" />
+                        <span asp-validation-for="Name" class="text-danger"></span>
                     </div>
                     <div class="mb-3">
-                        <label for="email" class="form-label">Email</label>
-                        <input type="email" class="form-control" id="email" value="alex.johnson@example.com">
+                        <label asp-for="Email" class="form-label"></label>
+                        <input asp-for="Email" class="form-control" />
+                        <span asp-validation-for="Email" class="text-danger"></span>
                     </div>
                     <div class="mb-3">
-                        <label for="password" class="form-label">Password</label>
-                        <input type="password" class="form-control" id="password" value="Hello123">
+                        <label asp-for="Password" class="form-label"></label>
+                        <input asp-for="Password" class="form-control" type="password" />
+                        <span asp-validation-for="Password" class="text-danger"></span>
                     </div>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
                 </form>
             </div>
         </div>
 
-        <!-- Column 2: Preferences -->
+        <!-- Column 2: Preferences (visual only) -->
         <div class="col-md-4">
             <div class="card p-4">
                 <h5 class="card-title">Preferences</h5>
@@ -165,7 +166,7 @@
             </div>
         </div>
 
-        <!-- Column 3: Loyalty Points -->
+        <!-- Column 3: Loyalty Points (visual only) -->
         <div class="col-md-4">
             <div class="card p-4 text-center">
                 <h5 class="card-title">Loyalty Points</h5>
@@ -176,5 +177,6 @@
     </div>
 </div>
 
-
-
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

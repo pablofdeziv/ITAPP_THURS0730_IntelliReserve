@@ -187,6 +187,29 @@ namespace IntelliReserve.Controllers
         }
 
 
+        [HttpGet]
+        public async Task<IActionResult> Profile()
+        {
+            // Obtiene el ID del usuario autenticado desde las claims
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+
+            if (userIdClaim == null)
+            {
+                return RedirectToAction("Login");
+            }
+
+            int userId = int.Parse(userIdClaim.Value);
+
+            var user = await _context.Users
+                .FirstOrDefaultAsync(u => u.Id == userId);
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            return View(user); // Deberás tener una vista en ~/Views/User/Profile.cshtml
+        }
 
     }
 }
