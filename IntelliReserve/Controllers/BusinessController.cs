@@ -99,39 +99,71 @@ namespace IntelliReserve.Controllers
         {
             return View();
         }
-/*
+
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> RegisterBusiness(RegisterBusinessViewModel model)
         {
             if (!ModelState.IsValid)
+            {
+                // Muestra errores si el modelo no es válido
+                foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
+                {
+                    Console.WriteLine("Model error: " + error.ErrorMessage);
+                }
                 return View(model);
+            }
 
-            // 1. Crear el usuario propietario
-            var user = new User
+            try
             {
-                Id = Guid.NewGuid(),
-                Name = model.Name,
-                Email = model.Email,
-                Password = model.Password // ⚠️ Encripta esto en producción
-            };
+                // Verifica si ya existe un usuario con ese correo
+                if (await _context.Users.AnyAsync(u => u.Email == model.Email))
+                {
+                    ModelState.AddModelError("Email", "El correo ya está registrado.");
+                    return View(model);
+                }
 
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
+                // Crear el usuario propietario
+                var user = new User
+                {
+                    Name = model.Name,
+                    Email = model.Email,
+                    Password = model.Password, // ⚠️ Hashear en producción
+                    Role = UserRole.BusinessAdmin
+                };
 
-            // 2. Crear el negocio
-            var business = new Business
+                _context.Users.Add(user);
+                await _context.SaveChangesAsync();
+
+                // Confirmar que se generó el ID
+                if (user.Id == 0)
+                {
+                    ModelState.AddModelError("", "No se pudo generar el ID del usuario.");
+                    return View(model);
+                }
+
+                // Crear el negocio
+                var business = new Business
+                {
+                    Name = model.OrganizationName,
+                    Address = model.Address,
+                    Phone = model.Phone,
+                    Description = model.Description,
+                    OwnerId = user.Id
+                };
+
+                _context.Businesses.Add(business);
+                await _context.SaveChangesAsync();
+
+                return RedirectToAction("Login", "User");
+            }
+            catch (Exception ex)
             {
-                Name = model.OrganizationName,
-                Address = model.Address,
-                Phone = model.Phone,
-                Description = model.Description,
-                OwnerId = user.Id
-            };
+                Console.WriteLine("ERROR AL REGISTRAR: " + ex.Message);
+                ModelState.AddModelError("", "Ocurrió un error al registrar el negocio. Intenta nuevamente.");
+                return View(model);
+            }
+        }
 
-            _context.Businesses.Add(business);
-            await _context.SaveChangesAsync();
-
-            return RedirectToAction("Login", "User");
-        }*/
     }
 }

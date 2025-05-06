@@ -1,6 +1,7 @@
 using IntelliReserve.Data;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
+using DotNetEnv; // Asegúrate de que tienes este namespace
 
 namespace IntelliReserve
 {
@@ -10,20 +11,24 @@ namespace IntelliReserve
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // 💡 Conexión a PostgreSQL con EF Core
-            builder.Services.AddDbContext<AppDbContext>(options =>
-                options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+            // Cargar las variables de entorno desde el archivo .env
+            Env.Load();
 
+            // Usar la variable de entorno CONNECTION_STRING para la conexión a PostgreSQL
+            builder.Services.AddDbContext<AppDbContext>(options =>
+                options.UseNpgsql(Env.GetString("CONNECTION_STRING"))); // Cambiado a la variable CONNECTION_STRING
+
+            Console.WriteLine(Env.GetString("CONNECTION_STRING"));
             // Add services to the container.
             builder.Services.AddControllersWithViews();
 
             builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-            .AddCookie(options =>
-            {
-                options.LoginPath = "/User/Login";
-                options.LogoutPath = "/User/Logout";
-                options.AccessDeniedPath = "/User/AccessDenied";
-            });
+                .AddCookie(options =>
+                {
+                    options.LoginPath = "/User/Login";
+                    options.LogoutPath = "/User/Logout";
+                    options.AccessDeniedPath = "/User/AccessDenied";
+                });
 
             var app = builder.Build();
 
@@ -43,10 +48,9 @@ namespace IntelliReserve
             app.UseAuthorization();
 
             app.MapControllerRoute(
-
-            name: "login",
-            pattern: "login",
-            defaults: new { controller = "User", action = "Login" });
+                name: "login",
+                pattern: "login",
+                defaults: new { controller = "User", action = "Login" });
 
             app.MapControllerRoute(
                 name: "default",

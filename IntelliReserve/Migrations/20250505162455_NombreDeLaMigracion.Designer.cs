@@ -3,6 +3,7 @@ using System;
 using IntelliReserve.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,10 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace IntelliReserve.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250505162455_NombreDeLaMigracion")]
+    partial class NombreDeLaMigracion
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -117,7 +119,10 @@ namespace IntelliReserve.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("OwnerId")
+                    b.Property<Guid>("OwnerId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("OwnerId1")
                         .HasColumnType("integer");
 
                     b.Property<string>("Phone")
@@ -126,7 +131,7 @@ namespace IntelliReserve.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("OwnerId");
+                    b.HasIndex("OwnerId1");
 
                     b.ToTable("Businesses");
                 });
@@ -413,7 +418,7 @@ namespace IntelliReserve.Migrations
                 {
                     b.HasOne("IntelliReserve.Models.User", "Owner")
                         .WithMany("Businesses")
-                        .HasForeignKey("OwnerId")
+                        .HasForeignKey("OwnerId1")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
