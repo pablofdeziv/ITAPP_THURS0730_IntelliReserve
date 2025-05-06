@@ -1,0 +1,177 @@
+﻿@model RegisterBusinessViewModel
+@{
+    ViewData["Title"] = "Business Profile";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+
+<style>
+    body {
+        font-family: 'Segoe UI', sans-serif;
+        background-color: #f9f9f9;
+        color: #333;
+        padding-top: 80px;
+    }
+
+    .navbar-custom {
+        background-color: #fff9db;
+        padding: 1rem 2rem;
+        border-bottom: 1px solid #ddd;
+        width: 100%;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 1000;
+    }
+
+    .navbar-brand {
+        font-weight: 700;
+        font-size: 1.5rem;
+        color: #333;
+    }
+
+        .navbar-brand i {
+            color: #f9c10b;
+            margin-right: 0.5rem;
+        }
+
+    .nav-link {
+        color: #333 !important;
+        font-weight: 500;
+        margin-left: 1rem;
+    }
+
+    .profile-section {
+        padding: 2rem;
+        margin-top: 80px;
+    }
+
+    .section-title {
+        font-size: 2.2rem;
+        font-weight: bold;
+        margin: 3rem 0 1.5rem;
+        text-align: center;
+        border-bottom: 2px solid #f1c40f;
+        padding-bottom: 0.5rem;
+    }
+
+    .card {
+        border-radius: 1rem;
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.05);
+    }
+
+    .form-label {
+        font-weight: 500;
+    }
+</style>
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-custom">
+    <a class="navbar-brand" href="#"><i class="bi bi-star-fill"></i> IntelliReserve</a>
+    <div class="ms-auto d-flex align-items-center">
+        <ul class="navbar-nav me-3">
+            <li class="nav-item"><a class="nav-link active" href="home-business">Home</a></li>
+            <li class="nav-item"><a class="nav-link" href="#">My Schedule</a></li>
+            <li class="nav-item"><a class="nav-link" href="profile-business">My Business</a></li>
+        </ul>
+        <i class="bi bi-building fs-3"></i>
+    </div>
+</nav>
+
+<div class="section-title">Business Profile</div>
+
+<!-- Success Message -->
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="container">
+        <div class="alert alert-success text-center">
+            @TempData["SuccessMessage"]
+        </div>
+    </div>
+}
+
+<!-- Main Section -->
+<div class="container profile-section">
+    <form asp-action="UpdateBusinessProfile" method="post">
+        <div class="row g-4">
+            <!-- Personal Information -->
+            <div class="col-md-4">
+                <div class="card p-4">
+                    <h5 class="card-title">Personal Information</h5>
+                    <div class="mb-3">
+                        <label asp-for="Name" class="form-label"></label>
+                        <input asp-for="Name" class="form-control" />
+                        <span asp-validation-for="Name" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Email" class="form-label"></label>
+                        <input asp-for="Email" class="form-control" />
+                        <span asp-validation-for="Email" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Password" class="form-label"></label>
+                        <input asp-for="Password" type="password" class="form-control" />
+                        <span asp-validation-for="Password" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Business Information -->
+            <div class="col-md-4">
+                <div class="card p-4">
+                    <h5 class="card-title">Business Information</h5>
+                    <div class="mb-3">
+                        <label asp-for="OrganizationName" class="form-label"></label>
+                        <input asp-for="OrganizationName" class="form-control" />
+                        <span asp-validation-for="OrganizationName" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Address" class="form-label"></label>
+                        <input asp-for="Address" class="form-control" />
+                        <span asp-validation-for="Address" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Phone" class="form-label"></label>
+                        <input asp-for="Phone" class="form-control" />
+                        <span asp-validation-for="Phone" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Description" class="form-label"></label>
+                        <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                        <span asp-validation-for="Description" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Preferences + Save -->
+            <div class="col-md-4">
+                <div class="card p-4">
+                    <h5 class="card-title">Preferences</h5>
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" id="notifications" checked>
+                        <label class="form-check-label" for="notifications">Notifications</label>
+                    </div>
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" id="darkTheme">
+                        <label class="form-check-label" for="darkTheme">Dark Theme</label>
+                    </div>
+                    <div class="mb-3">
+                        <label for="language" class="form-label">Language</label>
+                        <select class="form-select" id="language">
+                            <option selected>English</option>
+                            <option>Polish</option>
+                            <option>Spanish</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 mt-3">Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

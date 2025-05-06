@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using IntelliReserve.Data;
 using IntelliReserve.Models;
+using System.Security.Claims;
 
 namespace IntelliReserve.Controllers
 {
@@ -40,6 +41,23 @@ namespace IntelliReserve.Controllers
         {
             return View();
         }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAllBusinesses()
+        {
+            var businesses = await _context.Businesses
+                .Select(b => new
+                {
+                    name = b.Name,
+                    address = b.Address,
+                    phone = b.Phone,
+                    servicesLink = Url.Action("List", "Service", new { businessId = b.Id }) // o "#"
+                })
+                .ToListAsync();
+
+            return Json(businesses);
+        }
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -101,69 +119,103 @@ namespace IntelliReserve.Controllers
         }
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> RegisterBusiness(RegisterBusinessViewModel model)
+        public async Task<IActionResult> RegisterWithUser(RegisterBusinessViewModel model)
         {
             if (!ModelState.IsValid)
+                return View("Register", model);
+
+            // Verificamos que no exista ya el email
+            var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == model.Email);
+            if (existingUser != null)
             {
-                // Muestra errores si el modelo no es válido
-                foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
-                {
-                    Console.WriteLine("Model error: " + error.ErrorMessage);
-                }
-                return View(model);
+                ModelState.AddModelError("Email", "This email is already in use.");
+                return View("Register", model);
             }
 
-            try
+            // Creamos el usuario
+            var user = new User
             {
-                // Verifica si ya existe un usuario con ese correo
-                if (await _context.Users.AnyAsync(u => u.Email == model.Email))
-                {
-                    ModelState.AddModelError("Email", "El correo ya está registrado.");
-                    return View(model);
-                }
+                Name = model.Name,
+                Email = model.Email,
+                Password = model.Password // ⚠️ Considera hashear esta contraseña
+            };
 
-                // Crear el usuario propietario
-                var user = new User
-                {
-                    Name = model.Name,
-                    Email = model.Email,
-                    Password = model.Password, // ⚠️ Hashear en producción
-                    Role = UserRole.BusinessAdmin
-                };
+            _context.Users.Add(user);
+            await _context.SaveChangesAsync();
 
-                _context.Users.Add(user);
-                await _context.SaveChangesAsync();
-
-                // Confirmar que se generó el ID
-                if (user.Id == 0)
-                {
-                    ModelState.AddModelError("", "No se pudo generar el ID del usuario.");
-                    return View(model);
-                }
-
-                // Crear el negocio
-                var business = new Business
-                {
-                    Name = model.OrganizationName,
-                    Address = model.Address,
-                    Phone = model.Phone,
-                    Description = model.Description,
-                    OwnerId = user.Id
-                };
-
-                _context.Businesses.Add(business);
-                await _context.SaveChangesAsync();
-
-                return RedirectToAction("Login", "User");
-            }
-            catch (Exception ex)
+            // Creamos el negocio
+            var business = new Business
             {
-                Console.WriteLine("ERROR AL REGISTRAR: " + ex.Message);
-                ModelState.AddModelError("", "Ocurrió un error al registrar el negocio. Intenta nuevamente.");
-                return View(model);
-            }
+                Name = model.OrganizationName,
+                OwnerId = user.Id,
+                Address = model.Address,
+                Phone = model.Phone,
+                Description = model.Description
+            };
+                
+            _context.Businesses.Add(business);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("Login", "User");
         }
+
+        [HttpGet]
+        public async Task<IActionResult> ProfileBusiness()
+        {
+            int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null) return NotFound();
+
+            var business = await _context.Businesses.FirstOrDefaultAsync(b => b.OwnerId == userId);
+            if (business == null) return NotFound();
+
+            var model = new RegisterBusinessViewModel
+            {
+                OwnerId = user.Id,
+                Name = user.Name,
+                Email = user.Email,
+                Password = user.Password, // ⚠️ Solo para testing. En producción, no muestres contraseñas.
+
+                OrganizationName = business.Name,
+                Address = business.Address,
+                Phone = business.Phone,
+                Description = business.Description
+            };
+
+            return View(model);
+        }
+
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateBusinessProfile(RegisterBusinessViewModel model)
+        {
+            if (!ModelState.IsValid)
+                return View("ProfileBusiness", model);
+
+            // Actualizar usuario
+            var user = await _context.Users.FindAsync(model.OwnerId);
+            if (user == null) return NotFound();
+
+            user.Name = model.Name;
+            user.Email = model.Email;
+            user.Password = model.Password; // ⚠️ Considerar hash
+
+            // Actualizar negocio
+            var business = await _context.Businesses.FirstOrDefaultAsync(b => b.OwnerId == model.OwnerId);
+            if (business == null) return NotFound();
+
+            business.Name = model.OrganizationName;
+            business.Address = model.Address;
+            business.Phone = model.Phone;
+            business.Description = model.Description;
+
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "El perfil de negocio ha sido actualizado correctamente.";
+            return RedirectToAction("ProfileBusiness"); // Asegúrate de que este sea el nombre correcto
+        }
+
 
     }
 }

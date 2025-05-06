@@ -164,12 +164,12 @@ namespace IntelliReserve.Controllers
             }
 
             var claims = new List<Claim>
-    {
-        new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-        new Claim(ClaimTypes.Name, user.Name),
-        new Claim(ClaimTypes.Email, user.Email),
-        new Claim(ClaimTypes.Role, user.Role.ToString())
-    };
+            {
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim(ClaimTypes.Name, user.Name),
+                new Claim(ClaimTypes.Email, user.Email),
+                new Claim(ClaimTypes.Role, user.Role.ToString())
+            };
 
             var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
             var principal = new ClaimsPrincipal(identity);
@@ -185,5 +185,64 @@ namespace IntelliReserve.Controllers
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             return RedirectToAction("Login");
         }
+
+
+        [HttpGet]
+        public async Task<IActionResult> Profile()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null) return RedirectToAction("Login");
+
+            int userId = int.Parse(userIdClaim.Value);
+
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            if (user == null) return NotFound();
+
+            var model = new RegisterViewModel
+            {
+                Name = user.Name,
+                Email = user.Email,
+                Password = user.Password // En producción nunca devuelvas contraseñas
+            };
+
+            return View(model);
+        }
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateProfile(RegisterViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View("Profile", model); // Asegúrate de que la vista se llama "Profile"
+            }
+
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null)
+            {
+                return RedirectToAction("Login");
+            }
+
+            int userId = int.Parse(userIdClaim.Value);
+
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            // Actualiza los datos del usuario
+            user.Name = model.Name;
+            user.Email = model.Email;
+            user.Password = model.Password; // En producción deberías usar hashing
+
+            _context.Users.Update(user);
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Profile updated.";
+            return RedirectToAction("Profile");
+        }
+
     }
 }

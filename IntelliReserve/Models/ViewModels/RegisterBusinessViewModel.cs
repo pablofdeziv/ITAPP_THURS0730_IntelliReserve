@@ -11,6 +11,8 @@ public class RegisterBusinessViewModel
 
     [Required, DataType(DataType.Password)]
     public string Password { get; set; }
+    public int OwnerId { get; set; }
+
 
     // Datos del negocio
     [Required]
