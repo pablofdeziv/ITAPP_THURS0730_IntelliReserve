@@ -213,7 +213,7 @@ namespace IntelliReserve.Controllers
             await _context.SaveChangesAsync();
 
             TempData["SuccessMessage"] = "El perfil de negocio ha sido actualizado correctamente.";
-            return RedirectToAction("ProfileBusiness"); // Asegúrate de que este sea el nombre correcto
+            return RedirectToAction("commBusiness"); 
         }
 
 

@@ -74,9 +74,10 @@ namespace IntelliReserve.Controllers
 
         [Route("home-customer")]
         [HttpGet]
-        public IActionResult HomeCustomer()
+        public IActionResult CustomerHome()
         {
-            return View("~/Views/Home/CustomerHome.cshtml"); // Redirige a la vista de registro
+
+            return View("~/Views/Home/CustomerHome.cshtml"); 
 
         }
 

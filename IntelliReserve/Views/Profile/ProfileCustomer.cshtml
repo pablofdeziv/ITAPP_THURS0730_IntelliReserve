@@ -95,9 +95,9 @@
     <a class="navbar-brand" href="#"><i class="bi bi-star-fill"></i> IntelliReserve</a>
     <div class="ms-auto d-flex align-items-center">
         <ul class="navbar-nav me-3">
-            <li class="nav-item"><a class="nav-link active" href="home-customer">Home</a></li>
+            <a class="nav-link" asp-controller="Home" asp-action="CustomerHome">Home</a>
             <li class="nav-item"><a class="nav-link" href="#">My Bookings</a></li>
-            <li class="nav-item"><a class="nav-link" href="profile-customer">My Account</a></li>
+            <a class="nav-link" asp-controller="User" asp-action="Profile">My Account</a>
         </ul>
         <i class="bi bi-person-circle fs-3"></i>
     </div>

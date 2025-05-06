@@ -238,7 +238,7 @@
             <ul class="navbar-nav me-3">
                 <li class="nav-item"><a class="nav-link active" href="home-customer">Home</a></li>
                 <li class="nav-item"><a class="nav-link" href="#">My Bookings</a></li>
-                <li class="nav-item"><a class="nav-link" href="profile-customer">My Account</a></li>
+                <a class="nav-link" asp-controller="User" asp-action="Profile">My Account</a>
             </ul>
             <i class="bi bi-person-circle fs-3"></i>
         </div>
@@ -246,7 +246,7 @@
 
     <!-- Greeting -->
     <section class="container text-center mt-5">
-        <h2>Welcome, [Customer Name]!</h2>
+        <h2>Welcome, @User.Identity.Name!</h2>
         <p>We're glad to see you again. What would you like to do today?</p>
     </section>
 
