@@ -176,7 +176,7 @@ namespace IntelliReserve.Controllers
 
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
 
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("CustomerHome", "Home");
         }
 
         [HttpPost]
@@ -204,8 +204,10 @@ namespace IntelliReserve.Controllers
                 Email = user.Email,
                 Password = user.Password // En producción nunca devuelvas contraseñas
             };
+            Console.WriteLine($"DEBUG :: User loaded -> Name: {model.Name}, Email: {model.Email}");
 
-            return View(model);
+            return View("~/Views/Profile/ProfileCustomer.cshtml", model);
+         
         }
 
 
