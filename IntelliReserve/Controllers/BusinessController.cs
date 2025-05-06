@@ -112,51 +112,62 @@ namespace IntelliReserve.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        [HttpGet]
-        public IActionResult RegisterBusiness()
-        {
-            return View();
-        }
-
         [HttpPost]
+        [ValidateAntiForgeryToken]
+
         public async Task<IActionResult> RegisterWithUser(RegisterBusinessViewModel model)
         {
             if (!ModelState.IsValid)
-                return View("Register", model);
-
-            // Verificamos que no exista ya el email
-            var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == model.Email);
-            if (existingUser != null)
             {
-                ModelState.AddModelError("Email", "This email is already in use.");
-                return View("Register", model);
+                TempData["ErrorMessage"] = "El modelo no es válido. Revisa los campos del formulario.";
+                return View("~/Views/Account/RegisterBusiness.cshtml", model);
             }
 
-            // Creamos el usuario
-            var user = new User
+            try
             {
-                Name = model.Name,
-                Email = model.Email,
-                Password = model.Password // ⚠️ Considera hashear esta contraseña
-            };
+                // Verificamos que no exista ya el email
+                var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == model.Email);
+                if (existingUser != null)
+                {
+                    ModelState.AddModelError("Email", "Este email ya está en uso.");
+                    TempData["ErrorMessage"] = "Este email ya está registrado.";
+                    return View("~/Views/Account/RegisterBusiness.cshtml", model);
+                }
 
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
+                // Creamos el usuario
+                var user = new User
+                {
+                    Name = model.Name,
+                    Email = model.Email,
+                    Password = model.Password, // ⚠️ Considera hashear esta contraseña
+                    Role = UserRole.BusinessAdmin
+                };
 
-            // Creamos el negocio
-            var business = new Business
+                _context.Users.Add(user);
+                await _context.SaveChangesAsync();
+
+                // Creamos el negocio
+                var business = new Business
+                {
+                    Name = model.OrganizationName,
+                    OwnerId = user.Id,
+                    Address = model.Address,
+                    Phone = model.Phone,
+                    Description = model.Description
+                };
+
+                _context.Businesses.Add(business);
+                await _context.SaveChangesAsync();
+
+                TempData["SuccessMessage"] = "Negocio y usuario creados correctamente.";
+                return RedirectToAction("Login", "User");
+            }
+            catch (Exception ex)
             {
-                Name = model.OrganizationName,
-                OwnerId = user.Id,
-                Address = model.Address,
-                Phone = model.Phone,
-                Description = model.Description
-            };
-                
-            _context.Businesses.Add(business);
-            await _context.SaveChangesAsync();
-
-            return RedirectToAction("Login", "User");
+                // Captura el error y lo muestra
+                TempData["ErrorMessage"] = "Ocurrió un error al registrar el negocio: " + ex.Message;
+                return View("~/Views/Account/RegisterBusiness.cshtml", model);
+            }
         }
 
         [HttpGet]

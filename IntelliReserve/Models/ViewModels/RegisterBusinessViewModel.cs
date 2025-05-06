@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using IntelliReserve.Models;
+using System.ComponentModel.DataAnnotations;
 
 public class RegisterBusinessViewModel
 {
@@ -12,6 +13,9 @@ public class RegisterBusinessViewModel
     [Required, DataType(DataType.Password)]
     public string Password { get; set; }
     public int OwnerId { get; set; }
+
+    public UserRole? Role { get; set; }
+
 
 
     // Datos del negocio

@@ -52,7 +52,7 @@ namespace IntelliReserve.Controllers
         [HttpGet]
         public IActionResult RegisterBusiness()
         {
-            return View("~/Views/Account/ResgisterBusiness.cshtml"); // Redirige a la vista de registro
+            return View("~/Views/Account/RegisterBusiness.cshtml"); // Redirige a la vista de registro
        
         }
 
