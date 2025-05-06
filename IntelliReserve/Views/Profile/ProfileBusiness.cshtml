@@ -1,5 +1,5 @@
 ﻿@{
-    ViewData["Title"] = "User Profile";
+    ViewData["Title"] = "Business Profile";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
@@ -11,32 +11,18 @@
         font-family: 'Segoe UI', sans-serif;
         background-color: #f9f9f9;
         color: #333;
-        padding-top: 80px; /* Añadir espacio para que no quede cubierto por el navbar */
+        padding-top: 80px;
     }
 
-    /* Asegura que el navbar ocupe todo el ancho de la pantalla */
     .navbar-custom {
         background-color: #fff9db;
-        padding: 1rem 0; /* Ajusta el relleno horizontal a 0 */
+        padding: 1rem 2rem;
         border-bottom: 1px solid #ddd;
-        width: 100%; /* Asegura que el navbar ocupe todo el ancho */
-        position: fixed; /* Fijar el navbar al principio */
+        width: 100%;
+        position: fixed;
         top: 0;
         left: 0;
-        z-index: 1000; /* Asegura que esté por encima de otros contenidos */
-    }
-
-        .navbar-custom .container-fluid {
-            padding-left: 0;
-            padding-right: 0; /* Elimina los márgenes horizontales del contenedor */
-        }
-
-        .navbar-custom .navbar-nav {
-            flex-direction: row;
-        }
-
-    .navbar-nav .nav-item {
-        margin-left: 1.5rem;
+        z-index: 1000;
     }
 
     .navbar-brand {
@@ -53,22 +39,22 @@
     .nav-link {
         color: #333 !important;
         font-weight: 500;
+        margin-left: 1rem;
     }
 
-    /* Ajustes para el contenido, añadiendo margen superior */
     .profile-section {
         padding: 2rem;
-        margin-top: 80px; /* Añadir margen superior suficiente para el navbar fijo */
+        margin-top: 80px;
     }
-
 
     .section-title {
-        font-size: 2.5rem;
+        font-size: 2.2rem;
         font-weight: bold;
-        margin: 2rem 0;
+        margin: 3rem 0 1.5rem;
         text-align: center;
+        border-bottom: 2px solid #f1c40f;
+        padding-bottom: 0.5rem;
     }
-
 
     .card {
         border-radius: 1rem;
@@ -106,21 +92,17 @@
     <a class="navbar-brand" href="#"><i class="bi bi-star-fill"></i> IntelliReserve</a>
     <div class="ms-auto d-flex align-items-center">
         <ul class="navbar-nav me-3">
-            <li class="nav-item"><a class="nav-link active" href="home-customer">Home</a></li>
-            <li class="nav-item"><a class="nav-link" href="#">My Bookings</a></li>
-            <li class="nav-item"><a class="nav-link" href="profile-customer">My Account</a></li>
+            <li class="nav-item"><a class="nav-link active" href="home-business">Home</a></li>
+            <li class="nav-item"><a class="nav-link" href="#">My Schedule</a></li>
+            <li class="nav-item"><a class="nav-link" href="profile-business">My Business</a></li>
         </ul>
-        <i class="bi bi-person-circle fs-3"></i>
+        <i class="bi bi-building fs-3"></i>
     </div>
 </nav>
-
-<!-- Page Title -->
-<div class="section-title">My Profile</div>
-
 <!-- Main Section -->
 <div class="container profile-section">
     <div class="row g-4">
-        <!-- Column 1: Personal Information -->
+        <!-- Personal Information (above all) -->
         <div class="col-md-4">
             <div class="card p-4">
                 <h5 class="card-title">Personal Information</h5>
@@ -141,7 +123,32 @@
             </div>
         </div>
 
-        <!-- Column 2: Preferences -->
+        <!-- Business Information -->
+        <div class="col-md-4">
+            <div class="card p-4">
+                <h5 class="card-title">Business Information</h5>
+                <form>
+                    <div class="mb-3">
+                        <label for="businessName" class="form-label">Business Name</label>
+                        <input type="text" class="form-control" id="businessName" value="Sunset Diner">
+                    </div>
+                    <div class="mb-3">
+                        <label for="address" class="form-label">Address</label>
+                        <input type="text" class="form-control" id="address" value="123 Main St, Springfield">
+                    </div>
+                    <div class="mb-3">
+                        <label for="phone" class="form-label">Phone</label>
+                        <input type="text" class="form-control" id="phone" value="+1 555-123-4567">
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description" rows="3">Family-friendly restaurant with a cozy vibe and classic American dishes.</textarea>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Preferences -->
         <div class="col-md-4">
             <div class="card p-4">
                 <h5 class="card-title">Preferences</h5>
@@ -164,16 +171,13 @@
             </div>
         </div>
 
-        <!-- Column 3: Loyalty Points -->
+        <!-- Business Overview -->
         <div class="col-md-4">
             <div class="card p-4 text-center">
-                <h5 class="card-title">Loyalty Points</h5>
-                <p class="display-6">1,250 Points</p>
-                <button class="btn btn-outline-warning mt-2">View Transaction History</button>
+                <h5 class="card-title">Business Overview</h5>
+                <p class="display-6">⭐ 4.5 / 5</p>
+                <button class="btn btn-outline-warning mt-2">View Reviews</button>
             </div>
         </div>
     </div>
 </div>
-
-
-

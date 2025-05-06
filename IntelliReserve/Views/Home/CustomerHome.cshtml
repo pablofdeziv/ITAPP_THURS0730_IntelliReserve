@@ -1,0 +1,409 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IntelliReserve - Home</title>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f9f9f9;
+            color: #333;
+            padding-top: 80px;
+        }
+
+        .navbar-custom {
+            background-color: #fff9db;
+            padding: 1rem 2rem;
+            border-bottom: 1px solid #ddd;
+            width: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: #333;
+        }
+
+            .navbar-brand i {
+                color: #f9c10b;
+                margin-right: 0.5rem;
+            }
+
+        .nav-link {
+            color: #333 !important;
+            font-weight: 500;
+            margin-left: 1rem;
+        }
+
+        .navbar-nav {
+            margin-left: auto;
+        }
+
+        .container {
+            max-width: 1200px;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .d-flex {
+            display: flex;
+        }
+
+        .mt-4 {
+            margin-top: 2rem;
+        }
+
+        .mt-5 {
+            margin-top: 3rem;
+        }
+
+        .mb-4 {
+            margin-bottom: 1.5rem;
+        }
+
+        .card {
+            border-radius: 1rem;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.05);
+            margin-bottom: 2rem;
+        }
+
+        .card-title {
+            font-weight: 600;
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        .form-select,
+        .form-control {
+            border-radius: 1rem;
+            box-shadow: none;
+        }
+
+            .form-control:focus,
+            .form-select:focus {
+                border-color: #f9c10b;
+                box-shadow: 0 0 0 0.2rem rgba(249, 193, 11, 0.25);
+            }
+
+        .btn-primary {
+            background-color: #f9c10b;
+            border-color: #f9c10b;
+        }
+
+            .btn-primary:hover {
+                background-color: #e0b105;
+                border-color: #e0b105;
+            }
+
+        .business-table th,
+        .business-table td {
+            text-align: center;
+            padding: 1rem;
+        }
+
+        .business-table th {
+            background-color: #f9c10b;
+            color: white;
+        }
+
+        .business-table td {
+            background-color: #fff;
+            border: 1px solid #ddd;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        .footer {
+            background-color: #fff;
+            padding: 2rem 1rem;
+            margin-top: 3rem;
+            border-top: 1px solid #ddd;
+        }
+
+        footer h5 {
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        footer .social-links {
+            margin-top: 20px;
+        }
+
+            footer .social-links a {
+                color: #333;
+                margin: 0 10px;
+                text-decoration: none;
+            }
+
+                footer .social-links a:hover {
+                    color: #f9c10b;
+                }
+
+        .pagination {
+            justify-content: center;
+            display: flex;
+            gap: 20px;
+        }
+
+        .page-item.disabled .page-link {
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        .page-link {
+            font-size: 1.25rem;
+            padding: 0.5rem 1rem;
+        }
+
+        .page-item {
+            cursor: pointer;
+        }
+
+        .page-link:hover {
+            background-color: #f9c10b;
+            color: #fff;
+        }
+
+        .page-item {
+            border: 1px solid #f9c10b;
+            border-radius: 50%;
+        }
+
+        .service-card {
+            background-color: #fff4d6;
+            border: 1px solid #f9e3a1;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            text-align: center;
+            box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.05);
+        }
+
+            .service-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 0.8rem 1.5rem rgba(0,0,0,0.1);
+                background-color: #fff1c4;
+            }
+
+        .service-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .service-detail {
+            font-size: 1rem;
+            margin-top: 0.5rem;
+            color: #555;
+        }
+
+        .service-card .btn {
+            margin-top: 1rem;
+            background-color: #f9c10b;
+            border-color: #f9c10b;
+            color: #fff;
+            border-radius: 2rem;
+        }
+
+            .service-card .btn:hover {
+                background-color: #e0b105;
+                border-color: #e0b105;
+            }
+    </style>
+</head>
+
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-custom">
+        <a class="navbar-brand" href="#"><i class="bi bi-star-fill"></i> IntelliReserve</a>
+        <div class="ms-auto d-flex align-items-center">
+            <ul class="navbar-nav me-3">
+                <li class="nav-item"><a class="nav-link active" href="home-customer">Home</a></li>
+                <li class="nav-item"><a class="nav-link" href="#">My Bookings</a></li>
+                <li class="nav-item"><a class="nav-link" href="profile-customer">My Account</a></li>
+            </ul>
+            <i class="bi bi-person-circle fs-3"></i>
+        </div>
+    </nav>
+
+    <!-- Greeting -->
+    <section class="container text-center mt-5">
+        <h2>Welcome, [Customer Name]!</h2>
+        <p>We're glad to see you again. What would you like to do today?</p>
+    </section>
+
+    <!-- Search Bar -->
+    <section class="container text-center mt-4">
+        <div class="d-flex justify-content-center">
+            <input type="text" id="searchInput" class="form-control w-50" placeholder="Search businesses...">
+            <button class="btn btn-primary ms-2" onclick="filterTable()">Search</button>
+        </div>
+    </section>
+
+    <!-- Business Table -->
+    <section class="container mt-5">
+        <h3>Available Businesses</h3>
+        <div class="table-container">
+            <table class="table table-striped business-table" id="businessTable">
+                <thead>
+                    <tr>
+                        <th>Business Name</th>
+                        <th>Address</th>
+                        <th>Phone</th>
+                        <th>View Services</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Businesses will be added here dynamically -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <nav>
+            <ul class="pagination">
+                <li class="page-item" id="prevBtn" onclick="changePage(-1)">
+                    <a class="page-link" href="#">←</a>
+                </li>
+                <li class="page-item" id="nextBtn" onclick="changePage(1)">
+                    <a class="page-link" href="#">→</a>
+                </li>
+            </ul>
+        </nav>
+    </section>
+
+    <!-- Featured Services -->
+    <section class="container mt-5">
+        <h3 class="text-center mb-4">Featured Services</h3>
+        <div class="row" id="servicesContainer">
+            <!-- Service cards inserted dynamically -->
+        </div>
+    </section>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        const businesses = [
+            { name: "Business 1", address: "123 Street, City A", phone: "+34 912 345 678", servicesLink: "#" },
+            { name: "Business 2", address: "456 Avenue, City B", phone: "+34 913 345 678", servicesLink: "#" },
+            { name: "Business 3", address: "Central Plaza, City C", phone: "+34 914 345 678", servicesLink: "#" },
+            { name: "Business 4", address: "789 Street, City D", phone: "+34 915 345 678", servicesLink: "#" },
+            { name: "Business 5", address: "101 Street, City E", phone: "+34 916 345 678", servicesLink: "#" },
+            { name: "Business 6", address: "202 Street, City F", phone: "+34 917 345 678", servicesLink: "#" },
+            { name: "Business 7", address: "303 Avenue, City G", phone: "+34 918 345 678", servicesLink: "#" },
+            { name: "Business 8", address: "404 Street, City H", phone: "+34 919 345 678", servicesLink: "#" },
+            { name: "Business 9", address: "505 Street, City I", phone: "+34 920 345 678", servicesLink: "#" },
+            { name: "Business 10", address: "606 Avenue, City J", phone: "+34 921 345 678", servicesLink: "#" },
+            { name: "Business 11", address: "707 Street, City K", phone: "+34 922 345 678", servicesLink: "#" },
+            { name: "Business 12", address: "808 Street, City L", phone: "+34 923 345 678", servicesLink: "#" },
+            { name: "Business 13", address: "909 Avenue, City M", phone: "+34 924 345 678", servicesLink: "#" }
+        ];
+
+        let currentPage = 0;
+        const rowsPerPage = 10;
+
+        function showBusinesses() {
+            const tableBody = document.querySelector("#businessTable tbody");
+            tableBody.innerHTML = "";
+            const start = currentPage * rowsPerPage;
+            const end = start + rowsPerPage;
+            const currentBusinesses = businesses.slice(start, end);
+
+            currentBusinesses.forEach(business => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${business.name}</td>
+                    <td>${business.address}</td>
+                    <td>${business.phone}</td>
+                    <td><a href="${business.servicesLink}" class="btn btn-outline-primary">View Services</a></td>
+                `;
+                tableBody.appendChild(row);
+            });
+
+            document.getElementById("prevBtn").classList.toggle('disabled', currentPage === 0);
+            document.getElementById("nextBtn").classList.toggle('disabled', end >= businesses.length);
+        }
+
+        function changePage(direction) {
+            currentPage += direction;
+            showBusinesses();
+        }
+
+        function filterTable() {
+            const searchInput = document.getElementById("searchInput").value.toLowerCase();
+            const filteredBusinesses = businesses.filter(business =>
+                business.name.toLowerCase().includes(searchInput)
+            );
+            showFilteredBusinesses(filteredBusinesses);
+        }
+
+        function showFilteredBusinesses(filteredBusinesses) {
+            const tableBody = document.querySelector("#businessTable tbody");
+            tableBody.innerHTML = "";
+
+            filteredBusinesses.forEach(business => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${business.name}</td>
+                    <td>${business.address}</td>
+                    <td>${business.phone}</td>
+                    <td><a href="${business.servicesLink}" class="btn btn-outline-primary">View Services</a></td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        showBusinesses();
+
+        const services = [
+            { name: "Haircut", duration: "30 min", price: "€15" },
+            { name: "Relaxing Massage", duration: "60 min", price: "€45" },
+            { name: "Manicure", duration: "45 min", price: "€25" }
+        ];
+
+        function showServices() {
+            const servicesContainer = document.getElementById("servicesContainer");
+            services.forEach(service => {
+                const card = document.createElement("div");
+                card.className = "col-md-4 mb-4";
+
+                const encodedName = encodeURIComponent(service.name);
+                const reserveLink = `reserva.html?servicio=${encodedName}`;
+
+                card.innerHTML = `
+                    <div class="service-card">
+                        <div class="service-title">${service.name}</div>
+                        <div class="service-detail">Duration: ${service.duration}</div>
+                        <div class="service-detail">Price: ${service.price}</div>
+                        <a href="${reserveLink}" class="btn btn-primary">Book</a>
+                    </div>
+                `;
+
+                servicesContainer.appendChild(card);
+            });
+        }
+
+        showServices();
+    </script>
+</body>
+
+</html>
