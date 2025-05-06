@@ -1,0 +1,265 @@
+﻿@model IntelliReserve.Models.Service
+
+@{
+    ViewData["Title"] = "Create Service";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+<style>
+    .form-section {
+        background: #fff;
+        border-radius: 1rem;
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.05);
+        padding: 2rem;
+        margin-top: 80px;
+    }
+
+    .section-title {
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin-bottom: 2rem;
+        text-align: center;
+        color: #f9c10b;
+    }
+
+    .form-label {
+        font-weight: 500;
+        color: #f9c10b;
+    }
+
+    .schedule-entry {
+        border: 1px solid #f9c10b;
+        border-radius: .5rem;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        background-color: #fff9db;
+    }
+
+    .remove-btn {
+        cursor: pointer;
+        color: #f44336;
+    }
+
+    .btn-outline-primary {
+        margin-top: 1rem;
+        border-color: #f9c10b;
+        color: #f9c10b;
+    }
+
+        .btn-outline-primary:hover {
+            background-color: #f9c10b;
+            color: #fff;
+        }
+
+    .btn-success {
+        background-color: #f9c10b;
+        color: #fff;
+        border-radius: 0.5rem;
+    }
+
+        .btn-success:hover {
+            background-color: #f0b200;
+        }
+
+    .btn-secondary {
+        margin-left: 1rem;
+        border-radius: 0.5rem;
+    }
+
+    .schedules-container {
+        margin-top: 20px;
+        display: block;
+    }
+
+        .schedules-container .schedule-entry {
+            margin-bottom: 1rem;
+        }
+</style>
+
+<div class="container">
+    <div class="section-title">Create New Service</div>
+
+    <div class="form-section">
+        <form asp-action="Create" method="post">
+            <input type="hidden" asp-for="BusinessId" />
+
+            <div class="mb-3">
+                <label asp-for="Name" class="form-label">Service Name</label>
+                <input asp-for="Name" class="form-control" required />
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Duration" class="form-label">Duration (minutes)</label>
+                <input asp-for="Duration" type="number" min="1" class="form-control" required />
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Price" class="form-label">Price (€)</label>
+                <input asp-for="Price" type="number" step="0.01" min="0" class="form-control" required />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Select Days</label>
+                <div>
+                    <input type="checkbox" id="monday" value="Monday" /> Monday
+                    <input type="checkbox" id="tuesday" value="Tuesday" /> Tuesday
+                    <input type="checkbox" id="wednesday" value="Wednesday" /> Wednesday
+                    <input type="checkbox" id="thursday" value="Thursday" /> Thursday
+                    <input type="checkbox" id="friday" value="Friday" /> Friday
+                    <input type="checkbox" id="saturday" value="Saturday" /> Saturday
+                    <input type="checkbox" id="sunday" value="Sunday" /> Sunday
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Time Range</label>
+                <div class="row">
+                    <div class="col-md-6">
+                        <input type="time" id="start-time" class="form-control" required />
+                    </div>
+                    <div class="col-md-6">
+                        <input type="time" id="end-time" class="form-control" required />
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Start Date</label>
+                <input type="date" id="start-date" class="form-control" value="@DateTime.Now.ToString("yyyy-MM-dd")" required />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">End Date</label>
+                <input type="date" id="end-date" class="form-control" value="@DateTime.Now.AddDays(30).ToString("yyyy-MM-dd")" required />
+            </div>
+
+            <h5 class="mt-4">Service Schedules</h5>
+            <div id="schedules-container" class="schedules-container">
+            </div>
+
+            <button type="button" class="btn btn-outline-primary mb-3" onclick="generateSchedules()">Generate Schedules</button>
+
+            <div class="mt-4">
+                <button type="submit" class="btn btn-success">Create Service</button>
+                <a asp-action="Index" class="btn btn-secondary ms-2">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function generateSchedules() {
+            const duration = parseInt(document.querySelector('input[name="Duration"]').value);
+            const startTime = document.getElementById('start-time').value;
+            const endTime = document.getElementById('end-time').value;
+
+            const selectedDays = Array.from(document.querySelectorAll('input[type="checkbox"]:checked'))
+                .map(checkbox => checkbox.value);
+
+            const startDate = document.getElementById('start-date').value;
+            const endDate = document.getElementById('end-date').value;
+
+            if (selectedDays.length === 0 || !startTime || !endTime || isNaN(duration)) {
+                alert('Please select days, set a valid time range, duration, and start/end dates.');
+                return;
+            }
+
+            const schedulesContainer = document.getElementById('schedules-container');
+            schedulesContainer.innerHTML = ''; // Limpiar contenido previo
+
+            const [startHour, startMinute] = startTime.split(':').map(Number);
+            const [endHour, endMinute] = endTime.split(':').map(Number);
+
+            const startDateObj = new Date(startDate);
+            const endDateObj = new Date(endDate);
+
+            console.log("Selected Days: ", selectedDays);
+            console.log("Start Date: ", startDateObj);
+            console.log("End Date: ", endDateObj);
+            console.log("Start Time: ", startTime);
+            console.log("End Time: ", endTime);
+
+            let scheduleIndex = 0; // Índice para el Model Binding de la colección
+
+            selectedDays.forEach(day => {
+                let currentDate = new Date(startDateObj);
+
+                while (currentDate <= endDateObj) {
+                    if (currentDate.getDay() === getDayOfWeek(day)) {
+                        let currentHour = startHour;
+                        let currentMinute = startMinute;
+
+                        const endHourOfDay = endHour;
+                        const endMinuteOfDay = endMinute;
+
+                        while (currentHour < endHourOfDay || (currentHour === endHourOfDay && currentMinute < endMinuteOfDay)) {
+                            const year = currentDate.getFullYear();
+                            const month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
+                            const dayOfMonth = currentDate.getDate().toString().padStart(2, '0');
+                            const hourStr = currentHour.toString().padStart(2, '0');
+                            const minuteStr = currentMinute.toString().padStart(2, '0');
+
+                            const startDateTimeISO = `${year}-${month}-${dayOfMonth}T${hourStr}:${minuteStr}`;
+                            const endDateTimeObj = new Date(new Date(startDateTimeISO).getTime() + duration * 60000);
+                            const endYear = endDateTimeObj.getFullYear();
+                            const endMonth = (endDateTimeObj.getMonth() + 1).toString().padStart(2, '0');
+                            const endDayOfMonth = endDateTimeObj.getDate().toString().padStart(2, '0');
+                            const endHourStr = endDateTimeObj.getHours().toString().padStart(2, '0');
+                            const endMinuteStr = endDateTimeObj.getMinutes().toString().padStart(2, '0');
+                            const endDateTimeISO = `${endYear}-${endMonth}-${endDayOfMonth}T${endHourStr}:${endMinuteStr}`;
+
+                            const scheduleEntry = document.createElement('div');
+                            scheduleEntry.classList.add('schedule-entry', 'mb-3', 'border', 'p-2');
+                            scheduleEntry.innerHTML = `
+                                <div class="row align-items-center">
+                                    <div class="col-md-5">
+                                        <label class="form-label">Start DateTime</label>
+                                        <input type="datetime-local" name="ServiceSchedules[${scheduleIndex}].StartDateTime" class="form-control" value="${startDateTimeISO}" required />
+                                    </div>
+                                    <div class="col-md-5">
+                                        <label class="form-label">End DateTime</label>
+                                        <input type="datetime-local" name="ServiceSchedules[${scheduleIndex}].EndDateTime" class="form-control" value="${endDateTimeISO}" required />
+                                    </div>
+                                    <div class="col-md-2 d-flex align-items-center justify-content-end">
+                                        <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeSchedule(this)">Remove</button>
+                                    </div>
+                                </div>
+                            `;
+                            schedulesContainer.appendChild(scheduleEntry);
+
+                            const nextTime = new Date(new Date(`${year}-${month}-${dayOfMonth}T${hourStr}:${minuteStr}`).getTime() + duration * 60000);
+                            currentHour = nextTime.getHours();
+                            currentMinute = nextTime.getMinutes();
+                            scheduleIndex++;
+                        }
+                    }
+                    currentDate.setDate(currentDate.getDate() + 1);
+                }
+            });
+
+            schedulesContainer.style.display = 'block';
+            console.log('Schedules generated:', schedulesContainer.innerHTML);
+            console.log('Total schedules:', scheduleIndex);
+        }
+
+        function getDayOfWeek(day) {
+            switch (day) {
+                case 'Monday': return 1;
+                case 'Tuesday': return 2;
+                case 'Wednesday': return 3;
+                case 'Thursday': return 4;
+                case 'Friday': return 5;
+                case 'Saturday': return 6;
+                case 'Sunday': return 0;
+                default: return -1;
+            }
+        }
+
+        function removeSchedule(el) {
+            el.closest(".schedule-entry").remove();
+        }
+    </script>
+}

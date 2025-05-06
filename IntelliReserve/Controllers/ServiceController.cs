@@ -93,5 +93,15 @@ namespace IntelliReserve.Controllers
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
+
+
+
+        [Route("service-business")]
+        [HttpGet]
+        public IActionResult ProfileBusiness()
+        {
+            return View("~/Views/BusinessFuncts/CreateService.cshtml"); // Redirige a la vista de registro
+
+        }
     }
 }
