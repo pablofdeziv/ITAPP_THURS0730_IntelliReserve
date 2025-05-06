@@ -190,9 +190,35 @@ namespace IntelliReserve.Controllers
         [HttpGet]
         public async Task<IActionResult> Profile()
         {
-            // Obtiene el ID del usuario autenticado desde las claims
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null) return RedirectToAction("Login");
 
+            int userId = int.Parse(userIdClaim.Value);
+
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            if (user == null) return NotFound();
+
+            var model = new RegisterViewModel
+            {
+                Name = user.Name,
+                Email = user.Email,
+                Password = user.Password // En producción nunca devuelvas contraseñas
+            };
+
+            return View(model);
+        }
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateProfile(RegisterViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View("Profile", model); // Asegúrate de que la vista se llama "Profile"
+            }
+
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
             if (userIdClaim == null)
             {
                 return RedirectToAction("Login");
@@ -200,15 +226,22 @@ namespace IntelliReserve.Controllers
 
             int userId = int.Parse(userIdClaim.Value);
 
-            var user = await _context.Users
-                .FirstOrDefaultAsync(u => u.Id == userId);
-
+            var user = await _context.Users.FindAsync(userId);
             if (user == null)
             {
                 return NotFound();
             }
 
-            return View(user); // Deberás tener una vista en ~/Views/User/Profile.cshtml
+            // Actualiza los datos del usuario
+            user.Name = model.Name;
+            user.Email = model.Email;
+            user.Password = model.Password; // En producción deberías usar hashing
+
+            _context.Users.Update(user);
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Profile updated.";
+            return RedirectToAction("Profile");
         }
 
     }

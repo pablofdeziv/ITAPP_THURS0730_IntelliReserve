@@ -317,6 +317,18 @@
             { name: "Business 12", address: "808 Street, City L", phone: "+34 923 345 678", servicesLink: "#" },
             { name: "Business 13", address: "909 Avenue, City M", phone: "+34 924 345 678", servicesLink: "#" }
         ];
+       /* let businesses = [];
+
+        window.onload = async () => {
+            try {
+                const response = await fetch('/Business/GetAllBusinesses');
+                businesses = await response.json();
+                showBusinesses();
+            } catch (error) {
+                console.error("Error loading businesses:", error);
+            }
+        };*/
+
 
         let currentPage = 0;
         const rowsPerPage = 10;

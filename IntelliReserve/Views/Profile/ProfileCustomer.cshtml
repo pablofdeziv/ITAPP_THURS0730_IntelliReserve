@@ -16,36 +16,36 @@
     }
 
     .navbar-custom {
-            background-color: #fff9db;
-            padding: 1rem 2rem;
-            border-bottom: 1px solid #ddd;
-            width: 100%;
-            position: fixed;
-            top: 0;
-            left: 0;
-            z-index: 1000;
+        background-color: #fff9db;
+        padding: 1rem 2rem;
+        border-bottom: 1px solid #ddd;
+        width: 100%;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 1000;
+    }
+
+    .navbar-brand {
+        font-weight: 700;
+        font-size: 1.5rem;
+        color: #333;
+    }
+
+        .navbar-brand i {
+            color: #f9c10b;
+            margin-right: 0.5rem;
         }
 
-        .navbar-brand {
-            font-weight: 700;
-            font-size: 1.5rem;
-            color: #333;
-        }
+    .nav-link {
+        color: #333 !important;
+        font-weight: 500;
+        margin-left: 1rem;
+    }
 
-            .navbar-brand i {
-                color: #f9c10b;
-                margin-right: 0.5rem;
-            }
-
-        .nav-link {
-            color: #333 !important;
-            font-weight: 500;
-            margin-left: 1rem;
-        }
-
-        .navbar-nav {
-            margin-left: auto;
-        }
+    .navbar-nav {
+        margin-left: auto;
+    }
 
     .profile-section {
         padding: 2rem;
@@ -91,23 +91,30 @@
 </style>
 
 <!-- Navbar -->
-<!-- Navbar -->
 <nav class="navbar navbar-expand-lg navbar-custom">
     <a class="navbar-brand" href="#"><i class="bi bi-star-fill"></i> IntelliReserve</a>
-   
     <div class="ms-auto d-flex align-items-center">
         <ul class="navbar-nav me-3">
             <li class="nav-item"><a class="nav-link active" href="home-customer">Home</a></li>
             <li class="nav-item"><a class="nav-link" href="#">My Bookings</a></li>
             <li class="nav-item"><a class="nav-link" href="profile-customer">My Account</a></li>
-        </>
         </ul>
         <i class="bi bi-person-circle fs-3"></i>
     </div>
-</nav
+</nav>
 
 <!-- Page Title -->
 <div class="section-title">My Profile</div>
+
+<!-- Success Message -->
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="container">
+        <div class="alert alert-success text-center">
+            @TempData["SuccessMessage"]
+        </div>
+    </div>
+}
 
 <!-- Main Section -->
 <div class="container profile-section">

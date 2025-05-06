@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using IntelliReserve.Data;
 using IntelliReserve.Models;
+using System.Security.Claims;
 
 namespace IntelliReserve.Controllers
 {
@@ -40,6 +41,23 @@ namespace IntelliReserve.Controllers
         {
             return View();
         }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAllBusinesses()
+        {
+            var businesses = await _context.Businesses
+                .Select(b => new
+                {
+                    name = b.Name,
+                    address = b.Address,
+                    phone = b.Phone,
+                    servicesLink = Url.Action("List", "Service", new { businessId = b.Id }) // o "#"
+                })
+                .ToListAsync();
+
+            return Json(businesses);
+        }
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -140,6 +158,64 @@ namespace IntelliReserve.Controllers
 
             return RedirectToAction("Login", "User");
         }
+
+        [HttpGet]
+        public async Task<IActionResult> ProfileBusiness()
+        {
+            int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null) return NotFound();
+
+            var business = await _context.Businesses.FirstOrDefaultAsync(b => b.OwnerId == userId);
+            if (business == null) return NotFound();
+
+            var model = new RegisterBusinessViewModel
+            {
+                OwnerId = user.Id,
+                Name = user.Name,
+                Email = user.Email,
+                Password = user.Password, // ⚠️ Solo para testing. En producción, no muestres contraseñas.
+
+                OrganizationName = business.Name,
+                Address = business.Address,
+                Phone = business.Phone,
+                Description = business.Description
+            };
+
+            return View(model);
+        }
+
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateBusinessProfile(RegisterBusinessViewModel model)
+        {
+            if (!ModelState.IsValid)
+                return View("ProfileBusiness", model);
+
+            // Actualizar usuario
+            var user = await _context.Users.FindAsync(model.OwnerId);
+            if (user == null) return NotFound();
+
+            user.Name = model.Name;
+            user.Email = model.Email;
+            user.Password = model.Password; // ⚠️ Considerar hash
+
+            // Actualizar negocio
+            var business = await _context.Businesses.FirstOrDefaultAsync(b => b.OwnerId == model.OwnerId);
+            if (business == null) return NotFound();
+
+            business.Name = model.OrganizationName;
+            business.Address = model.Address;
+            business.Phone = model.Phone;
+            business.Description = model.Description;
+
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "El perfil de negocio ha sido actualizado correctamente.";
+            return RedirectToAction("ProfileBusiness"); // Asegúrate de que este sea el nombre correcto
+        }
+
 
     }
 }

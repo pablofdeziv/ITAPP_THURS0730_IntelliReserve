@@ -1,4 +1,5 @@
-﻿@{
+﻿@model RegisterBusinessViewModel
+@{
     ViewData["Title"] = "Business Profile";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
@@ -64,27 +65,6 @@
     .form-label {
         font-weight: 500;
     }
-
-    .footer {
-        background-color: #fff;
-        padding: 2rem 1rem;
-        margin-top: 3rem;
-        border-top: 1px solid #ddd;
-    }
-
-        .footer h6 {
-            font-weight: 600;
-            margin-bottom: 1rem;
-        }
-
-        .footer a {
-            color: #333;
-            text-decoration: none;
-        }
-
-            .footer a:hover {
-                text-decoration: underline;
-            }
 </style>
 
 <!-- Navbar -->
@@ -99,85 +79,99 @@
         <i class="bi bi-building fs-3"></i>
     </div>
 </nav>
-<!-- Main Section -->
-<div class="container profile-section">
-    <div class="row g-4">
-        <!-- Personal Information (above all) -->
-        <div class="col-md-4">
-            <div class="card p-4">
-                <h5 class="card-title">Personal Information</h5>
-                <form>
-                    <div class="mb-3">
-                        <label for="name" class="form-label">Name</label>
-                        <input type="text" class="form-control" id="name" value="Alex Johnson">
-                    </div>
-                    <div class="mb-3">
-                        <label for="email" class="form-label">Email</label>
-                        <input type="email" class="form-control" id="email" value="alex.johnson@example.com">
-                    </div>
-                    <div class="mb-3">
-                        <label for="password" class="form-label">Password</label>
-                        <input type="password" class="form-control" id="password" value="Hello123">
-                    </div>
-                </form>
-            </div>
-        </div>
 
-        <!-- Business Information -->
-        <div class="col-md-4">
-            <div class="card p-4">
-                <h5 class="card-title">Business Information</h5>
-                <form>
-                    <div class="mb-3">
-                        <label for="businessName" class="form-label">Business Name</label>
-                        <input type="text" class="form-control" id="businessName" value="Sunset Diner">
-                    </div>
-                    <div class="mb-3">
-                        <label for="address" class="form-label">Address</label>
-                        <input type="text" class="form-control" id="address" value="123 Main St, Springfield">
-                    </div>
-                    <div class="mb-3">
-                        <label for="phone" class="form-label">Phone</label>
-                        <input type="text" class="form-control" id="phone" value="+1 555-123-4567">
-                    </div>
-                    <div class="mb-3">
-                        <label for="description" class="form-label">Description</label>
-                        <textarea class="form-control" id="description" rows="3">Family-friendly restaurant with a cozy vibe and classic American dishes.</textarea>
-                    </div>
-                </form>
-            </div>
-        </div>
+<div class="section-title">Business Profile</div>
 
-        <!-- Preferences -->
-        <div class="col-md-4">
-            <div class="card p-4">
-                <h5 class="card-title">Preferences</h5>
-                <div class="form-check form-switch mb-3">
-                    <input class="form-check-input" type="checkbox" id="notifications" checked>
-                    <label class="form-check-label" for="notifications">Notifications</label>
-                </div>
-                <div class="form-check form-switch mb-3">
-                    <input class="form-check-input" type="checkbox" id="darkTheme">
-                    <label class="form-check-label" for="darkTheme">Dark Theme</label>
-                </div>
-                <div class="mb-3">
-                    <label for="language" class="form-label">Language</label>
-                    <select class="form-select" id="language">
-                        <option selected>English</option>
-                        <option>Polish</option>
-                        <option>Spanish</option>
-                    </select>
-                </div>
-            </div>
-        </div>
-
-        <!-- Business Overview -->
-        <div class="col-md-4">
-            <div class="card p-4 text-center">
-                <h5 class="card-title">Business Overview</h5>
-                <p class="display-6">⭐ 4.5 / 5</p>
-                <button class="btn btn-outline-warning mt-2">View Reviews</button>
-            </div>
+<!-- Success Message -->
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="container">
+        <div class="alert alert-success text-center">
+            @TempData["SuccessMessage"]
         </div>
     </div>
+}
+
+<!-- Main Section -->
+<div class="container profile-section">
+    <form asp-action="UpdateBusinessProfile" method="post">
+        <div class="row g-4">
+            <!-- Personal Information -->
+            <div class="col-md-4">
+                <div class="card p-4">
+                    <h5 class="card-title">Personal Information</h5>
+                    <div class="mb-3">
+                        <label asp-for="Name" class="form-label"></label>
+                        <input asp-for="Name" class="form-control" />
+                        <span asp-validation-for="Name" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Email" class="form-label"></label>
+                        <input asp-for="Email" class="form-control" />
+                        <span asp-validation-for="Email" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Password" class="form-label"></label>
+                        <input asp-for="Password" type="password" class="form-control" />
+                        <span asp-validation-for="Password" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Business Information -->
+            <div class="col-md-4">
+                <div class="card p-4">
+                    <h5 class="card-title">Business Information</h5>
+                    <div class="mb-3">
+                        <label asp-for="OrganizationName" class="form-label"></label>
+                        <input asp-for="OrganizationName" class="form-control" />
+                        <span asp-validation-for="OrganizationName" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Address" class="form-label"></label>
+                        <input asp-for="Address" class="form-control" />
+                        <span asp-validation-for="Address" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Phone" class="form-label"></label>
+                        <input asp-for="Phone" class="form-control" />
+                        <span asp-validation-for="Phone" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Description" class="form-label"></label>
+                        <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                        <span asp-validation-for="Description" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Preferences + Save -->
+            <div class="col-md-4">
+                <div class="card p-4">
+                    <h5 class="card-title">Preferences</h5>
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" id="notifications" checked>
+                        <label class="form-check-label" for="notifications">Notifications</label>
+                    </div>
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" id="darkTheme">
+                        <label class="form-check-label" for="darkTheme">Dark Theme</label>
+                    </div>
+                    <div class="mb-3">
+                        <label for="language" class="form-label">Language</label>
+                        <select class="form-select" id="language">
+                            <option selected>English</option>
+                            <option>Polish</option>
+                            <option>Spanish</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 mt-3">Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </form>
 </div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
