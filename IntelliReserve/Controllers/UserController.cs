@@ -7,6 +7,7 @@ using IntelliReserve.Models.ViewModels;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using IntelliReserve.Helpers;
 
 namespace IntelliReserve.Controllers
 {
@@ -72,7 +73,7 @@ namespace IntelliReserve.Controllers
             {
                 Name = model.Name,
                 Email = model.Email,
-                Password = model.Password, // Reemplazar con hash en producción
+                Password = PasswordUtils.HashPassword(model.Password), // Reemplazar con hash en producción
                 Role = UserRole.Customer
             };
 
@@ -154,14 +155,13 @@ namespace IntelliReserve.Controllers
                 return View(model);
             }
 
-            var user = await _context.Users
-                .FirstOrDefaultAsync(u => u.Email == model.Email && u.Password == model.Password);
-
-            if (user == null)
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == model.Email);
+            if (user == null || !PasswordUtils.VerifyPassword(user.Password, model.Password))
             {
                 ModelState.AddModelError(string.Empty, "Credenciales inválidas.");
                 return View(model);
             }
+
 
             var claims = new List<Claim>
             {
@@ -208,53 +208,51 @@ namespace IntelliReserve.Controllers
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
             if (user == null) return NotFound();
 
-            var model = new RegisterViewModel
+            var model = new EditProfileViewModel
             {
                 Name = user.Name,
-                Email = user.Email,
-                Password = user.Password // En producción nunca devuelvas contraseñas
+                Email = user.Email
+                // Password no se rellena por seguridad
             };
-            Console.WriteLine($"DEBUG :: User loaded -> Name: {model.Name}, Email: {model.Email}");
 
             return View("~/Views/Profile/ProfileCustomer.cshtml", model);
-         
         }
+
+
 
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> UpdateProfile(RegisterViewModel model)
+        public async Task<IActionResult> UpdateProfile(EditProfileViewModel model)
         {
             if (!ModelState.IsValid)
             {
-                return View("Profile", model); // Asegúrate de que la vista se llama "Profile"
+                return View("~/Views/Profile/ProfileCustomer.cshtml", model);
             }
 
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-            if (userIdClaim == null)
-            {
-                return RedirectToAction("Login");
-            }
+            if (userIdClaim == null) return RedirectToAction("Login");
 
             int userId = int.Parse(userIdClaim.Value);
 
             var user = await _context.Users.FindAsync(userId);
-            if (user == null)
-            {
-                return NotFound();
-            }
+            if (user == null) return NotFound();
 
-            // Actualiza los datos del usuario
             user.Name = model.Name;
             user.Email = model.Email;
-            user.Password = model.Password; // En producción deberías usar hashing
+
+            if (!string.IsNullOrEmpty(model.Password))
+            {
+                user.Password = PasswordUtils.HashPassword(model.Password); // Usa el helper de hash
+            }
 
             _context.Users.Update(user);
             await _context.SaveChangesAsync();
 
-            TempData["SuccessMessage"] = "Profile updated.";
+            TempData["SuccessMessage"] = "Profile updated properly.";
             return RedirectToAction("Profile");
         }
+
 
     }
 }

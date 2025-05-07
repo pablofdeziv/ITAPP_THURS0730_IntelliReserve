@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using IntelliReserve.Data;
 using IntelliReserve.Models;
 using System.Security.Claims;
+using IntelliReserve.Helpers;
 
 namespace IntelliReserve.Controllers
 {
@@ -139,7 +140,7 @@ namespace IntelliReserve.Controllers
                 {
                     Name = model.Name,
                     Email = model.Email,
-                    Password = model.Password, // ⚠️ Considera hashear esta contraseña
+                    Password = PasswordUtils.HashPassword(model.Password), // ⚠️ Considera hashear esta contraseña
                     Role = UserRole.BusinessAdmin
                 };
 
@@ -181,12 +182,12 @@ namespace IntelliReserve.Controllers
             var business = await _context.Businesses.FirstOrDefaultAsync(b => b.OwnerId == userId);
             if (business == null) return NotFound();
 
-            var model = new RegisterBusinessViewModel
+            var model = new EditBusinessProfileViewModel
             {
-                OwnerId = user.Id,
+                OwnerId = user.Id,  
                 Name = user.Name,
                 Email = user.Email,
-                Password = user.Password, // ⚠️ Solo para testing. En producción, no muestres contraseñas.
+                Password = "", // ⚠️ Solo para testing. En producción, no muestres contraseñas.
 
                 OrganizationName = business.Name,
                 Address = business.Address,
@@ -194,12 +195,13 @@ namespace IntelliReserve.Controllers
                 Description = business.Description
             };
 
-            return View(model);
+            return View("~/Views/Profile/ProfileBusiness.cshtml", model);
         }
 
 
+
         [HttpPost]
-        public async Task<IActionResult> UpdateBusinessProfile(RegisterBusinessViewModel model)
+        public async Task<IActionResult> UpdateBusinessProfile(EditBusinessProfileViewModel model)
         {
             if (!ModelState.IsValid)
                 return View("ProfileBusiness", model);
@@ -210,7 +212,11 @@ namespace IntelliReserve.Controllers
 
             user.Name = model.Name;
             user.Email = model.Email;
-            user.Password = model.Password; // ⚠️ Considerar hash
+            if (!string.IsNullOrWhiteSpace(model.Password))
+            {
+                user.Password = PasswordUtils.HashPassword(model.Password);
+            }
+
 
             // Actualizar negocio
             var business = await _context.Businesses.FirstOrDefaultAsync(b => b.OwnerId == model.OwnerId);
@@ -223,8 +229,8 @@ namespace IntelliReserve.Controllers
 
             await _context.SaveChangesAsync();
 
-            TempData["SuccessMessage"] = "El perfil de negocio ha sido actualizado correctamente.";
-            return RedirectToAction("commBusiness"); 
+            TempData["SuccessMessage"] = "Business profile updated properly.";
+            return RedirectToAction("ProfileBusiness", "Business");
         }
 
 

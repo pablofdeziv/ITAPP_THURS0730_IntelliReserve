@@ -1,4 +1,4 @@
-﻿@model RegisterBusinessViewModel
+﻿@model EditBusinessProfileViewModel
 @{
     ViewData["Title"] = "Business Profile";
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -72,9 +72,9 @@
     <a class="navbar-brand" href="#"><i class="bi bi-star-fill"></i> IntelliReserve</a>
     <div class="ms-auto d-flex align-items-center">
         <ul class="navbar-nav me-3">
-            <li class="nav-item"><a class="nav-link active" href="home-business">Home</a></li>
+            <a class="nav-link" asp-controller="Home" asp-action="HomeBusiness">Home</a>
             <li class="nav-item"><a class="nav-link" href="#">My Schedule</a></li>
-            <li class="nav-item"><a class="nav-link" href="profile-business">My Business</a></li>
+            <a class="nav-link" asp-controller="Business" asp-action="ProfileBusiness">My Account</a>
         </ul>
         <i class="bi bi-building fs-3"></i>
     </div>
@@ -111,10 +111,11 @@
                         <span asp-validation-for="Email" class="text-danger"></span>
                     </div>
                     <div class="mb-3">
-                        <label asp-for="Password" class="form-label"></label>
-                        <input asp-for="Password" type="password" class="form-control" />
+                        <label asp-for="Password" class="form-label">Password (leave blank to keep current)</label>
+                        <input asp-for="Password" class="form-control" type="password" />
                         <span asp-validation-for="Password" class="text-danger"></span>
                     </div>
+
                 </div>
             </div>
 

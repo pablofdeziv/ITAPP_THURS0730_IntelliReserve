@@ -1,7 +1,6 @@
-﻿using IntelliReserve.Models;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
-public class RegisterBusinessViewModel
+public class EditBusinessProfileViewModel
 {
     // User information
     [Required(ErrorMessage = "Name is required.")]
@@ -11,13 +10,9 @@ public class RegisterBusinessViewModel
     [EmailAddress(ErrorMessage = "Invalid email format.")]
     public string Email { get; set; }
 
-    [Required(ErrorMessage = "Password is required.")]
     [DataType(DataType.Password)]
     [MinLength(6, ErrorMessage = "Password must be at least 6 characters.")]
-    public string Password { get; set; }
-
-    public int OwnerId { get; set; }
-    public UserRole? Role { get; set; }
+    public string? Password { get; set; }
 
     // Business information
     [Required(ErrorMessage = "Organization name is required.")]
@@ -31,4 +26,7 @@ public class RegisterBusinessViewModel
 
     [Required(ErrorMessage = "Description is required.")]
     public string Description { get; set; }
+    
+    public int OwnerId { get; set; }
+
 }
