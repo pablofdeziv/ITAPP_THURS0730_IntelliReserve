@@ -135,11 +135,22 @@
                 <input type="date" id="end-date" class="form-control" value="@DateTime.Now.AddDays(30).ToString("yyyy-MM-dd")" required />
             </div>
 
-            <h5 class="mt-4">Service Schedules</h5>
-            <div id="schedules-container" class="schedules-container">
+
+            <div class="d-flex align-items-center gap-2 mb-3">
+                <button type="button" class="btn btn-outline-primary" onclick="generateSchedules()">Generate Schedules</button>
+
+                <button class="btn btn-outline-secondary d-flex align-items-center justify-content-center p-2" type="button"
+                        data-bs-toggle="collapse" data-bs-target="#scheduleCollapse" aria-expanded="false" aria-controls="scheduleCollapse"
+                        style="width: 40px; height: 40px;">
+                    <span id="toggle-icon" style="font-size: 1.2rem;">▼</span>
+                </button>
             </div>
 
-            <button type="button" class="btn btn-outline-primary mb-3" onclick="generateSchedules()">Generate Schedules</button>
+            <div id="scheduleCollapse" class="collapse">
+                <h5 class="mt-4">Service Schedules</h5>
+                <div id="schedules-container" class="schedules-container"></div>
+            </div>
+
 
             <div class="mt-4">
                 <button type="submit" class="btn btn-success">Create Service</button>
@@ -168,7 +179,11 @@
             }
 
             const schedulesContainer = document.getElementById('schedules-container');
-            schedulesContainer.innerHTML = ''; // Limpiar contenido previo
+             //schedulesContainer.innerHTML = ''; // Limpiar contenido previo
+
+             document.getElementById("scheduleCollapse").classList.add("show");
+             document.getElementById("toggle-icon").textContent = '▲';
+
 
             const [startHour, startMinute] = startTime.split(':').map(Number);
             const [endHour, endMinute] = endTime.split(':').map(Number);
@@ -261,5 +276,18 @@
         function removeSchedule(el) {
             el.closest(".schedule-entry").remove();
         }
+
+            const toggleButton = document.querySelector('[data-bs-toggle="collapse"]');
+        const toggleIcon = document.getElementById("toggle-icon");
+        const scheduleCollapse = document.getElementById("scheduleCollapse");
+
+        scheduleCollapse.addEventListener('shown.bs.collapse', () => {
+            toggleIcon.textContent = '▲';
+        });
+
+        scheduleCollapse.addEventListener('hidden.bs.collapse', () => {
+            toggleIcon.textContent = '▼';
+        });
+
     </script>
 }
