@@ -236,11 +236,24 @@
         <a class="navbar-brand" href="#"><i class="bi bi-star-fill"></i> IntelliReserve</a>
         <div class="ms-auto d-flex align-items-center">
             <ul class="navbar-nav me-3">
-                <li class="nav-item"><a class="nav-link active" href="home-customer">Home</a></li>
-                <li class="nav-item"><a class="nav-link" href="#">My Bookings</a></li>
-                <a class="nav-link" asp-controller="User" asp-action="Profile">My Account</a>
+                <li class="nav-item">
+                    <a class="nav-link" asp-controller="Home" asp-action="CustomerHome">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">My Bookings</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" asp-controller="User" asp-action="Profile">My Account</a>
+                </li>
             </ul>
-            <i class="bi bi-person-circle fs-3"></i>
+            <i class="bi bi-person-circle fs-3 me-3"></i>
+
+            <!-- Logout Button -->
+            <form method="post" asp-controller="Account" asp-action="Logout">
+                <button type="submit" class="btn btn-outline-danger">
+                    <i class="bi bi-box-arrow-right"></i> Logout
+                </button>
+            </form>
         </div>
     </nav>
 

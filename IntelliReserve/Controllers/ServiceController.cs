@@ -103,5 +103,14 @@ namespace IntelliReserve.Controllers
             return View("~/Views/BusinessFuncts/CreateService.cshtml"); // Redirige a la vista de registro
 
         }
+
+
+        [Route("edit-service-business")]
+        [HttpGet]
+        public IActionResult EditService()
+        {
+            return View("~/Views/BusinessFuncts/EditService.cshtml"); // Redirige a la vista de editar servicio
+
+        }
     }
 }
