@@ -13,9 +13,9 @@ namespace IntelliReserve.Models
         public string Description { get; set; }
 
         public User Owner { get; set; }
-        public ICollection<Employee> Employees { get; set; }
+        //public ICollection<Employee> Employees { get; set; }
         public ICollection<Service> Services { get; set; }
-        public ICollection<Schedule> Schedules { get; set; }
-        public ICollection<Review> Reviews { get; set; }
+        //public ICollection<Schedule> Schedules { get; set; }
+        //public ICollection<Review> Reviews { get; set; }
     }
 }

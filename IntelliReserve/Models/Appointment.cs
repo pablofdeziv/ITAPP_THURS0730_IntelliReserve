@@ -8,17 +8,14 @@ namespace IntelliReserve.Models
     public class Appointment
     {
         public int Id { get; set; }
-        public Guid UserId { get; set; }
-        public Guid ServiceId { get; set; }
-        public Guid EmployeeId { get; set; }
-        public DateTime DateTime { get; set; }
+        public int UserId { get; set; }
+        public int ServiceScheduleId { get; set; }
+        public ServiceSchedule ServiceSchedule { get; set; }
         public AppointmentStatus Status { get; set; }
 
         public User User { get; set; }
         public Service Service { get; set; }
-        public Employee Employee { get; set; }
 
-        public ICollection<AppointmentHistory> History { get; set; }
-        public Payment? Payment { get; set; } // nullable, ya que puede no tener pago aún
+       // public ICollection<AppointmentHistory> History { get; set; }
     }
 }

@@ -17,10 +17,13 @@ namespace IntelliReserve.Data
         public DbSet<Schedule> Schedules { get; set; }
         public DbSet<Review> Reviews { get; set; }
         public DbSet<Appointment> Appointments { get; set; }
+        public DbSet<ServiceAvailability> ServiceAvailabilities { get; set; }
+
         public DbSet<AppointmentHistory> AppointmentHistories { get; set; }
         public DbSet<ServiceSchedule> ServiceSchedules { get; set; }
         public DbSet<Payment> Payments { get; set; }
         public DbSet<Notification> Notifications { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

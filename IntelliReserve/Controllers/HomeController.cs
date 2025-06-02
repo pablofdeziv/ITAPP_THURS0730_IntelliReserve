@@ -1,6 +1,9 @@
+using IntelliReserve.Data;
 using IntelliReserve.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
+using System.Security.Claims;
 using System.Security.Principal;
 
 namespace IntelliReserve.Controllers
@@ -8,11 +11,14 @@ namespace IntelliReserve.Controllers
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
+        private readonly AppDbContext _context;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(ILogger<HomeController> logger, AppDbContext context)
         {
             _logger = logger;
+            _context = context;
         }
+
 
         public IActionResult Index()
         {
@@ -62,14 +68,30 @@ namespace IntelliReserve.Controllers
             return View("~/Views/Account/RegisterBusiness.cshtml"); // Redirige a la vista de registro
        
         }
-
         [Route("home-business")]
         [HttpGet]
         public IActionResult HomeBusiness()
         {
-            return View("~/Views/Home/AdminHome.cshtml"); // Redirige a la vista de registro
+            // Obtener el ID del usuario logueado
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
+            // Buscar el negocio del usuario
+            var business = _context.Businesses
+                .Include(b => b.Services)
+                .FirstOrDefault(b => b.OwnerId == userId);
+
+            if (business == null)
+            {
+                return RedirectToAction("RegisterBusiness");
+            }
+
+            // Obtener solo los servicios de esta empresa
+            var services = business.Services.ToList();
+
+            // Pasar los servicios como modelo a la vista
+            return View("~/Views/Home/AdminHome.cshtml", services);
         }
+
 
         [Route("profile-customer")]
         [HttpGet]

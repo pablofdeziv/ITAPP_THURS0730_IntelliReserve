@@ -27,10 +27,10 @@ namespace IntelliReserve.Controllers
 
             var business = await _context.Businesses
                 .Include(b => b.Owner)
-                .Include(b => b.Employees)
+               // .Include(b => b.Employees)
                 .Include(b => b.Services)
-                .Include(b => b.Schedules)
-                .Include(b => b.Reviews)
+               // .Include(b => b.Schedules)
+               // .Include(b => b.Reviews)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (business == null) return NotFound();

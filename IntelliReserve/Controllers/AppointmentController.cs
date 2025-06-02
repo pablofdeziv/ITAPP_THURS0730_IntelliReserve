@@ -18,9 +18,9 @@ namespace IntelliReserve.Controllers
         {
             var appointments = _context.Appointments
                 .Include(a => a.User)
-                .Include(a => a.Service)
-                .Include(a => a.Employee)
-                .Include(a => a.Payment);
+                .Include(a => a.Service);
+                //.Include(a => a.Employee)
+               // .Include(a => a.Payment);
             return View(await appointments.ToListAsync());
         }
 
@@ -31,9 +31,9 @@ namespace IntelliReserve.Controllers
             var appointment = await _context.Appointments
                 .Include(a => a.User)
                 .Include(a => a.Service)
-                .Include(a => a.Employee)
-                .Include(a => a.History)
-                .Include(a => a.Payment)
+               // .Include(a => a.Employee)
+               // .Include(a => a.History)
+                //.Include(a => a.Payment)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (appointment == null) return NotFound();
@@ -95,7 +95,7 @@ namespace IntelliReserve.Controllers
             var appointment = await _context.Appointments
                 .Include(a => a.User)
                 .Include(a => a.Service)
-                .Include(a => a.Employee)
+               // .Include(a => a.Employee)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (appointment == null) return NotFound();
             return View(appointment);

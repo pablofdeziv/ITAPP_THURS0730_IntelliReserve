@@ -30,37 +30,25 @@ namespace IntelliReserve.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("DateTime")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("EmployeeId")
-                        .HasColumnType("uuid");
-
-                    b.Property<int>("EmployeeId1")
+                    b.Property<int>("ServiceId")
                         .HasColumnType("integer");
 
-                    b.Property<Guid>("ServiceId")
-                        .HasColumnType("uuid");
-
-                    b.Property<int>("ServiceId1")
+                    b.Property<int>("ServiceScheduleId")
                         .HasColumnType("integer");
 
                     b.Property<int>("Status")
                         .HasColumnType("integer");
 
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
-
-                    b.Property<int>("UserId1")
+                    b.Property<int>("UserId")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("EmployeeId1");
+                    b.HasIndex("ServiceId");
 
-                    b.HasIndex("ServiceId1");
+                    b.HasIndex("ServiceScheduleId");
 
-                    b.HasIndex("UserId1");
+                    b.HasIndex("UserId");
 
                     b.ToTable("Appointments");
                 });
@@ -213,8 +201,7 @@ namespace IntelliReserve.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AppointmentId")
-                        .IsUnique();
+                    b.HasIndex("AppointmentId");
 
                     b.ToTable("Payments");
                 });
@@ -296,10 +283,13 @@ namespace IntelliReserve.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<Guid>("BusinessId")
-                        .HasColumnType("uuid");
+                    b.Property<DateTime>("AvailableFrom")
+                        .HasColumnType("timestamp with time zone");
 
-                    b.Property<int>("BusinessId1")
+                    b.Property<DateTime>("AvailableTo")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("BusinessId")
                         .HasColumnType("integer");
 
                     b.Property<int>("Duration")
@@ -314,9 +304,30 @@ namespace IntelliReserve.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("BusinessId1");
+                    b.HasIndex("BusinessId");
 
                     b.ToTable("Services");
+                });
+
+            modelBuilder.Entity("IntelliReserve.Models.ServiceAvailability", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("DayOfWeek")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ServiceId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ServiceId");
+
+                    b.ToTable("ServiceAvailabilities");
                 });
 
             modelBuilder.Entity("IntelliReserve.Models.ServiceSchedule", b =>
@@ -373,27 +384,27 @@ namespace IntelliReserve.Migrations
 
             modelBuilder.Entity("IntelliReserve.Models.Appointment", b =>
                 {
-                    b.HasOne("IntelliReserve.Models.Employee", "Employee")
+                    b.HasOne("IntelliReserve.Models.Service", "Service")
                         .WithMany()
-                        .HasForeignKey("EmployeeId1")
+                        .HasForeignKey("ServiceId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("IntelliReserve.Models.Service", "Service")
+                    b.HasOne("IntelliReserve.Models.ServiceSchedule", "ServiceSchedule")
                         .WithMany()
-                        .HasForeignKey("ServiceId1")
+                        .HasForeignKey("ServiceScheduleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("IntelliReserve.Models.User", "User")
                         .WithMany()
-                        .HasForeignKey("UserId1")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Employee");
-
                     b.Navigation("Service");
+
+                    b.Navigation("ServiceSchedule");
 
                     b.Navigation("User");
                 });
@@ -401,7 +412,7 @@ namespace IntelliReserve.Migrations
             modelBuilder.Entity("IntelliReserve.Models.AppointmentHistory", b =>
                 {
                     b.HasOne("IntelliReserve.Models.Appointment", "Appointment")
-                        .WithMany("History")
+                        .WithMany()
                         .HasForeignKey("AppointmentId1")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -423,7 +434,7 @@ namespace IntelliReserve.Migrations
             modelBuilder.Entity("IntelliReserve.Models.Employee", b =>
                 {
                     b.HasOne("IntelliReserve.Models.Business", "Business")
-                        .WithMany("Employees")
+                        .WithMany()
                         .HasForeignKey("BusinessId1")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -445,8 +456,8 @@ namespace IntelliReserve.Migrations
             modelBuilder.Entity("IntelliReserve.Models.Payment", b =>
                 {
                     b.HasOne("IntelliReserve.Models.Appointment", "Appointment")
-                        .WithOne("Payment")
-                        .HasForeignKey("IntelliReserve.Models.Payment", "AppointmentId")
+                        .WithMany()
+                        .HasForeignKey("AppointmentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -456,7 +467,7 @@ namespace IntelliReserve.Migrations
             modelBuilder.Entity("IntelliReserve.Models.Review", b =>
                 {
                     b.HasOne("IntelliReserve.Models.Business", "Business")
-                        .WithMany("Reviews")
+                        .WithMany()
                         .HasForeignKey("BusinessId1")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -475,7 +486,7 @@ namespace IntelliReserve.Migrations
             modelBuilder.Entity("IntelliReserve.Models.Schedule", b =>
                 {
                     b.HasOne("IntelliReserve.Models.Business", "Business")
-                        .WithMany("Schedules")
+                        .WithMany()
                         .HasForeignKey("BusinessId1")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -487,17 +498,17 @@ namespace IntelliReserve.Migrations
                 {
                     b.HasOne("IntelliReserve.Models.Business", "Business")
                         .WithMany("Services")
-                        .HasForeignKey("BusinessId1")
+                        .HasForeignKey("BusinessId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Business");
                 });
 
-            modelBuilder.Entity("IntelliReserve.Models.ServiceSchedule", b =>
+            modelBuilder.Entity("IntelliReserve.Models.ServiceAvailability", b =>
                 {
                     b.HasOne("IntelliReserve.Models.Service", "Service")
-                        .WithMany()
+                        .WithMany("AvailableDays")
                         .HasForeignKey("ServiceId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -505,22 +516,27 @@ namespace IntelliReserve.Migrations
                     b.Navigation("Service");
                 });
 
-            modelBuilder.Entity("IntelliReserve.Models.Appointment", b =>
+            modelBuilder.Entity("IntelliReserve.Models.ServiceSchedule", b =>
                 {
-                    b.Navigation("History");
+                    b.HasOne("IntelliReserve.Models.Service", "Service")
+                        .WithMany("Schedules")
+                        .HasForeignKey("ServiceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.Navigation("Payment");
+                    b.Navigation("Service");
                 });
 
             modelBuilder.Entity("IntelliReserve.Models.Business", b =>
                 {
-                    b.Navigation("Employees");
+                    b.Navigation("Services");
+                });
 
-                    b.Navigation("Reviews");
+            modelBuilder.Entity("IntelliReserve.Models.Service", b =>
+                {
+                    b.Navigation("AvailableDays");
 
                     b.Navigation("Schedules");
-
-                    b.Navigation("Services");
                 });
 
             modelBuilder.Entity("IntelliReserve.Models.User", b =>

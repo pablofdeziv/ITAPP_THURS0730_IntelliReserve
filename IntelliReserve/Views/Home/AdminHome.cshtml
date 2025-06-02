@@ -2,6 +2,9 @@
     ViewData["Title"] = "Admin Dashboard";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
+@using System.Linq
+@model List<IntelliReserve.Models.Service>
+
 
 <!-- Bootstrap y Bootstrap Icons -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -119,17 +122,24 @@
             <div class="card p-4">
                 <h5 class="card-title">Service Management</h5>
                 <ul class="list-group list-group-flush">
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        Spa Treatment <button class="btn btn-sm btn-outline-secondary">Edit</button>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        Yoga Class <button class="btn btn-sm btn-outline-secondary">Edit</button>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        Personal Training <button class="btn btn-sm btn-outline-secondary">Edit</button>
-                    </li>
+                    @if (Model.Any())
+                    {
+                        foreach (var service in Model)
+                        {
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                @service.Name
+                                <button class="btn btn-sm btn-outline-secondary">Edit</button>
+                            </li>
+                        }
+                    }
+                    else
+                    {
+                        <li class="list-group-item">No services found for your business.</li>
+                    }
+
                 </ul>
             </div>
+
         </div>
 
         <!-- Columna 2 -->
