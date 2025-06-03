@@ -1,4 +1,4 @@
-﻿@model IntelliReserve.Models.ViewModels.ServiceEditViewModel
+﻿@model IntelliReserve.Models.ViewModels.EditServiceViewModel
 
 @{
     ViewData["Title"] = "Edit Service";
@@ -8,113 +8,36 @@
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
 
 <style>
-    .form-section {
-        background: #fff;
-        border-radius: 1rem;
-        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.05);
-        padding: 2rem;
-        margin-top: 80px;
-    }
-
-    .section-title {
-        font-size: 2.5rem;
-        font-weight: bold;
-        margin-bottom: 2rem;
-        text-align: center;
-        color: #f9c10b;
-    }
-
-    .form-label {
-        font-weight: 500;
-        color: #f9c10b;
-    }
-
-    .schedule-entry {
-        border: 1px solid #f9c10b;
-        border-radius: .5rem;
-        padding: 1rem;
-        margin-bottom: 1rem;
-        background-color: #fff9db;
-    }
-
-    .remove-btn {
-        cursor: pointer;
-        color: #f44336;
-    }
-
-    .btn-outline-primary {
-        margin-top: 1rem;
-        border-color: #f9c10b;
-        color: #f9c10b;
-    }
-
-        .btn-outline-primary:hover {
-            background-color: #f9c10b;
-            color: #fff;
-        }
-
-    .btn-success {
-        background-color: #f9c10b;
-        color: #fff;
-        border-radius: 0.5rem;
-    }
-
-        .btn-success:hover {
-            background-color: #f0b200;
-        }
-
-    .btn-secondary {
-        margin-left: 1rem;
-        border-radius: 0.5rem;
-    }
-
-    .schedules-container {
-        margin-top: 20px;
-        display: block;
-    }
-
-        .schedules-container .schedule-entry {
-            margin-bottom: 1rem;
-        }
+    /* ... aquí va tu CSS del ejemplo anterior, igual que antes ... */
 </style>
 
 <div class="container">
-    <div class="section-title">Edit [Service Name]</div>
-
-    @if (TempData["SuccessMessage"] != null)
-    {
-        <div class="alert alert-success" role="alert">
-            @TempData["SuccessMessage"]
-        </div>
-    }
+    <div class="section-title">Edit Service</div>
 
     <div class="form-section">
-        <form asp-action="Edit" method="post">
-            <input type="hidden" asp-for="Service.Id" />
-            <input type="hidden" asp-for="Service.BusinessId" />
-
+        <form asp-action="EditService" asp-controller="Service" method="post">
+            <input type="hidden" asp-for="Id" />
             <div class="mb-3">
-                <label asp-for="Service.Name" class="form-label">Service Name</label>
-                <input asp-for="Service.Name" class="form-control" required />
+                <label asp-for="Name" class="form-label">Service Name</label>
+                <input asp-for="Name" class="form-control" required />
             </div>
 
             <div class="mb-3">
-                <label asp-for="Service.Duration" class="form-label">Duration (minutes)</label>
-                <input asp-for="Service.Duration" type="number" min="1" class="form-control" required />
+                <label asp-for="Duration" class="form-label">Duration (minutes)</label>
+                <input asp-for="Duration" type="number" min="1" class="form-control" required />
             </div>
 
             <div class="mb-3">
-                <label asp-for="Service.Price" class="form-label">Price (€)</label>
-                <input asp-for="Service.Price" type="number" step="0.01" min="0" class="form-control" required />
+                <label asp-for="Price" class="form-label">Price (€)</label>
+                <input asp-for="Price" type="number" step="0.01" min="0" class="form-control" required />
             </div>
 
             <div class="mb-3">
                 <label class="form-label">Select Days</label>
                 <div>
-                    @foreach (var day in new[] { "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" })
+                    @foreach (var day in Enum.GetNames(typeof(DayOfWeek)))
                     {
-                     //   <input type="checkbox" id="@day" value="@day" @(Model.SelectedDays.Contains(day) ? "checked" : "") /> @day
-                        <input type="checkbox" id="@day" value=" "checked" : "") /> @day
+                        <input type="checkbox" name="AvailableDays" value="@day" /> @day
                     }
                 </div>
             </div>
@@ -123,26 +46,32 @@
                 <label class="form-label">Time Range</label>
                 <div class="row">
                     <div class="col-md-6">
-                        <input type="time" asp-for="ServiceSchedule.StartDateTime" class="form-control" required />
+                        <input asp-for="AvailableFrom" type="time" class="form-control" required />
                     </div>
                     <div class="col-md-6">
-                        <input type="time" asp-for="ServiceSchedule.EndDateTime" class="form-control" required />
+                        <input asp-for="AvailableTo" type="time" class="form-control" required />
                     </div>
                 </div>
             </div>
 
             <div class="mb-3">
-                <label class="form-label">Start Date</label>
-                <input type="date" asp-for="ServiceSchedule.StartDateTime" class="form-control" required />
+                <label asp-for="StartDate" class="form-label">Start Date</label>
+                <input asp-for="StartDate" type="date" class="form-control" required />
             </div>
 
             <div class="mb-3">
-                <label class="form-label">End Date</label>
-                <input type="date" asp-for="ServiceSchedule.EndDateTime" class="form-control" required />
+                <label asp-for="EndDate" class="form-label">End Date</label>
+                <input asp-for="EndDate" type="date" class="form-control" required />
             </div>
 
             <div class="d-flex align-items-center gap-2 mb-3">
                 <button type="button" class="btn btn-outline-primary" onclick="generateSchedules()">Generate Schedules</button>
+
+                <button class="btn btn-outline-secondary d-flex align-items-center justify-content-center p-2" type="button"
+                        data-bs-toggle="collapse" data-bs-target="#scheduleCollapse" aria-expanded="false" aria-controls="scheduleCollapse"
+                        style="width: 40px; height: 40px;">
+                    <span id="toggle-icon" style="font-size: 1.2rem;">▼</span>
+                </button>
             </div>
 
             <div id="scheduleCollapse" class="collapse">
@@ -151,7 +80,7 @@
             </div>
 
             <div class="mt-4">
-                <button type="submit" class="btn btn-success">Update Service</button>
+                <button type="submit" class="btn btn-success">Edit Service</button>
                 <a asp-action="Index" class="btn btn-secondary ms-2">Cancel</a>
             </div>
         </form>
@@ -161,15 +90,15 @@
 @section Scripts {
     <script>
         function generateSchedules() {
-            const duration = parseInt(document.querySelector('input[name="Duration"]').value);
-            const startTime = document.getElementById('start-time').value;
-            const endTime = document.getElementById('end-time').value;
+            const duration = parseInt(document.getElementById('Duration').value);
+            const startTime = document.getElementById('AvailableFrom').value;
+            const endTime = document.getElementById('AvailableTo').value;
 
-            const selectedDays = Array.from(document.querySelectorAll('input[type="checkbox"]:checked'))
+            const selectedDays = Array.from(document.querySelectorAll('input[name="AvailableDays"]:checked'))
                 .map(checkbox => checkbox.value);
 
-            const startDate = document.getElementById('start-date').value;
-            const endDate = document.getElementById('end-date').value;
+            const startDate = document.getElementById('StartDate').value;
+            const endDate = document.getElementById('EndDate').value;
 
             if (selectedDays.length === 0 || !startTime || !endTime || isNaN(duration)) {
                 alert('Please select days, set a valid time range, duration, and start/end dates.');
@@ -177,7 +106,10 @@
             }
 
             const schedulesContainer = document.getElementById('schedules-container');
+            schedulesContainer.innerHTML = '';
+
             document.getElementById("scheduleCollapse").classList.add("show");
+            document.getElementById("toggle-icon").textContent = '▲';
 
             const [startHour, startMinute] = startTime.split(':').map(Number);
             const [endHour, endMinute] = endTime.split(':').map(Number);
@@ -195,10 +127,7 @@
                         let currentHour = startHour;
                         let currentMinute = startMinute;
 
-                        const endHourOfDay = endHour;
-                        const endMinuteOfDay = endMinute;
-
-                        while (currentHour < endHourOfDay || (currentHour === endHourOfDay && currentMinute < endMinuteOfDay)) {
+                        while (currentHour < endHour || (currentHour === endHour && currentMinute < endMinute)) {
                             const year = currentDate.getFullYear();
                             const month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
                             const dayOfMonth = currentDate.getDate().toString().padStart(2, '0');
@@ -206,61 +135,59 @@
                             const minuteStr = currentMinute.toString().padStart(2, '0');
 
                             const startDateTimeISO = `${year}-${month}-${dayOfMonth}T${hourStr}:${minuteStr}`;
-                            const endDateTimeObj = new Date(new Date(startDateTimeISO).getTime() + duration * 60000);
-                            const endYear = endDateTimeObj.getFullYear();
-                            const endMonth = (endDateTimeObj.getMonth() + 1).toString().padStart(2, '0');
-                            const endDayOfMonth = endDateTimeObj.getDate().toString().padStart(2, '0');
+
+                            const endDateTimeObj = new Date(`${startDateTimeISO}`);
+                            endDateTimeObj.setMinutes(endDateTimeObj.getMinutes() + duration);
                             const endHourStr = endDateTimeObj.getHours().toString().padStart(2, '0');
                             const endMinuteStr = endDateTimeObj.getMinutes().toString().padStart(2, '0');
-                            const endDateTimeISO = `${endYear}-${endMonth}-${endDayOfMonth}T${endHourStr}:${endMinuteStr}`;
+                            const endDateTimeISO = `${year}-${month}-${dayOfMonth}T${endHourStr}:${endMinuteStr}`;
 
                             const scheduleEntry = document.createElement('div');
                             scheduleEntry.classList.add('schedule-entry', 'mb-3', 'border', 'p-2');
                             scheduleEntry.innerHTML = `
                                 <div class="row align-items-center">
-                                    <div class="col-md-5">
-                                        <label class="form-label">Start DateTime</label>
-                                        <input type="datetime-local" name="ServiceSchedules[${scheduleIndex}].StartDateTime" class="form-control" value="${startDateTimeISO}" required />
+                                    <div class="col-10">
+                                        <strong>Schedule ${scheduleIndex + 1}:</strong>
+                                        <p><b>Day:</b> ${day} | <b>Start:</b> ${startDateTimeISO} | <b>End:</b> ${endDateTimeISO}</p>
+                                        <input type="hidden" name="Schedules[${scheduleIndex}].StartDateTime" value="${startDateTimeISO}" />
+                                        <input type="hidden" name="Schedules[${scheduleIndex}].EndDateTime" value="${endDateTimeISO}" />
                                     </div>
-                                    <div class="col-md-5">
-                                        <label class="form-label">End DateTime</label>
-                                        <input type="datetime-local" name="ServiceSchedules[${scheduleIndex}].EndDateTime" class="form-control" value="${endDateTimeISO}" required />
+                                    <div class="col-2">
+                                        <span class="remove-btn" onclick="removeSchedule(this)">Remove</span>
                                     </div>
-                                    <div class="col-md-2 d-flex align-items-center justify-content-end">
-                                        <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeSchedule(this)">Remove</button>
-                                    </div>
-                                </div>
-                            `;
-                            schedulesContainer.appendChild(scheduleEntry);
+                                </div>`;
 
-                            const nextTime = new Date(new Date(`${year}-${month}-${dayOfMonth}T${hourStr}:${minuteStr}`).getTime() + duration * 60000);
-                            currentHour = nextTime.getHours();
-                            currentMinute = nextTime.getMinutes();
+                            schedulesContainer.appendChild(scheduleEntry);
                             scheduleIndex++;
+
+                            currentMinute += duration;
+                            if (currentMinute >= 60) {
+                                currentMinute -= 60;
+                                currentHour += 1;
+                            }
                         }
                     }
                     currentDate.setDate(currentDate.getDate() + 1);
                 }
             });
-
-            schedulesContainer.style.display = 'block';
         }
 
         function getDayOfWeek(day) {
-            switch (day) {
-                case 'Monday': return 1;
-                case 'Tuesday': return 2;
-                case 'Wednesday': return 3;
-                case 'Thursday': return 4;
-                case 'Friday': return 5;
-                case 'Saturday': return 6;
-                case 'Sunday': return 0;
-                default: return -1;
-            }
+            const daysOfWeek = {
+                "Sunday": 0,
+                "Monday": 1,
+                "Tuesday": 2,
+                "Wednesday": 3,
+                "Thursday": 4,
+                "Friday": 5,
+                "Saturday": 6
+            };
+            return daysOfWeek[day] ?? -1;
         }
 
-        function removeSchedule(el) {
-            el.closest(".schedule-entry").remove();
+        function removeSchedule(button) {
+            const scheduleEntry = button.closest('.schedule-entry');
+            scheduleEntry.remove();
         }
     </script>
 }

@@ -104,10 +104,10 @@ namespace IntelliReserve.Controllers
             _context.Services.Remove(service);
             _context.SaveChanges();
 
-            return RedirectToAction("Index", "Business");
+            return RedirectToAction("HomeBusiness", "Home");
         }
-    
-       
+
+
 
         [Route("service-business")]
         [HttpGet]
@@ -193,6 +193,86 @@ namespace IntelliReserve.Controllers
 
             return Ok(services);
         }
+    
+        [HttpGet]
+        [Route("edit-service-business/{id}")]
+        public IActionResult EditService(int id)
+        {
+            var service = _context.Services
+                .Include(s => s.Schedules)
+                .Include(s => s.AvailableDays)
+                .FirstOrDefault(s => s.Id == id);
+
+            if (service == null)
+            {
+                return NotFound();
+            }
+
+            var model = new EditServiceViewModel
+            {
+                Id = service.Id,
+                Name = service.Name,
+                Duration = service.Duration,
+                Price = service.Price,
+                AvailableFrom = service.AvailableFrom.ToLocalTime().TimeOfDay,
+                AvailableTo = service.AvailableTo.ToLocalTime().TimeOfDay,
+                StartDate = service.Schedules.Min(s => s.StartDateTime).ToLocalTime().Date,
+                EndDate = service.Schedules.Max(s => s.EndDateTime).ToLocalTime().Date,
+                AvailableDays = service.AvailableDays.Select(d => d.DayOfWeek).ToList(),
+                Schedules = service.Schedules.Select(sc => new ServiceScheduleViewModel
+                {
+                    StartDateTime = sc.StartDateTime.ToLocalTime(),
+                    EndDateTime = sc.EndDateTime.ToLocalTime()
+                }).ToList()
+            };
+
+            return View("~/Views/BusinessFuncts/EditService.cshtml", model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+
+        public IActionResult EditService(EditServiceViewModel model)
+        {
+            if (!ModelState.IsValid)
+                return View(model);
+
+            var service = _context.Services
+                .Include(s => s.Schedules)
+                .Include(s => s.AvailableDays)
+                .FirstOrDefault(s => s.Id == model.Id);
+
+            if (service == null)
+                return NotFound();
+
+            // Actualizar propiedades
+            service.Name = model.Name;
+            service.Duration = model.Duration;
+            service.Price = model.Price;
+            service.AvailableFrom = DateTime.Today.Add(model.AvailableFrom).ToUniversalTime();
+            service.AvailableTo = DateTime.Today.Add(model.AvailableTo).ToUniversalTime();
+
+            // Reemplazar días disponibles y horarios
+            _context.ServiceAvailabilities.RemoveRange(service.AvailableDays);
+            _context.ServiceSchedules.RemoveRange(service.Schedules);
+
+
+            service.AvailableDays = model.AvailableDays.Select(day => new ServiceAvailability
+            {
+                DayOfWeek = day
+            }).ToList();
+
+            service.Schedules = model.Schedules.Select(s => new ServiceSchedule
+            {
+                StartDateTime = DateTime.SpecifyKind(s.StartDateTime, DateTimeKind.Local).ToUniversalTime(),
+                EndDateTime = DateTime.SpecifyKind(s.EndDateTime, DateTimeKind.Local).ToUniversalTime()
+            }).ToList();
+
+            _context.SaveChanges();
+
+            return RedirectToAction("HomeBusiness", "Home");
+        }
+
 
     }
 }
