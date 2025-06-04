@@ -14,8 +14,7 @@ namespace IntelliReserve.Models
         public AppointmentStatus Status { get; set; }
 
         public User User { get; set; }
-        public Service Service { get; set; }
 
-       // public ICollection<AppointmentHistory> History { get; set; }
+       public ICollection<AppointmentHistory> History { get; set; }
     }
 }

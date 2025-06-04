@@ -5,7 +5,7 @@ namespace IntelliReserve.Models
     public class AppointmentHistory
     {
         public int Id { get; set; }
-        public Guid AppointmentId { get; set; }
+        public int AppointmentId { get; set; }
         public DateTime Timestamp { get; set; }
         public string StatusChange { get; set; }
         public string Comment { get; set; }

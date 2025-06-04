@@ -1,10 +1,13 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using IntelliReserve.Data;
 using IntelliReserve.Models;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace IntelliReserve.Controllers
 {
+    [Authorize]
     public class AppointmentController : Controller
     {
         private readonly AppDbContext _context;
@@ -14,101 +17,73 @@ namespace IntelliReserve.Controllers
             _context = context;
         }
 
-        public async Task<IActionResult> Index()
-        {
-            var appointments = _context.Appointments
-                .Include(a => a.User)
-                .Include(a => a.Service);
-                //.Include(a => a.Employee)
-               // .Include(a => a.Payment);
-            return View(await appointments.ToListAsync());
-        }
-
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null) return NotFound();
-
-            var appointment = await _context.Appointments
-                .Include(a => a.User)
-                .Include(a => a.Service)
-               // .Include(a => a.Employee)
-               // .Include(a => a.History)
-                //.Include(a => a.Payment)
-                .FirstOrDefaultAsync(m => m.Id == id);
-
-            if (appointment == null) return NotFound();
-
-            return View(appointment);
-        }
-
-        public IActionResult Create()
-        {
-            return View();
-        }
-
+        // POST: Appointment/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("UserId,ServiceId,EmployeeId,DateTime,Status")] Appointment appointment)
+        public IActionResult Create(int serviceScheduleId)
         {
-            if (ModelState.IsValid)
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            var appointment = new Appointment
             {
-                _context.Add(appointment);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            return View(appointment);
+                UserId = userId,
+                ServiceScheduleId = serviceScheduleId,
+                Status = AppointmentStatus.Pending
+            };
+
+            _context.Appointments.Add(appointment);
+            _context.SaveChanges();
+
+            return RedirectToAction("CalendarView"); // Cambia esto al destino deseado
         }
 
-        public async Task<IActionResult> Edit(int? id)
+        // GET: Appointment/Edit/5
+        public IActionResult Edit(int id)
         {
-            if (id == null) return NotFound();
-            var appointment = await _context.Appointments.FindAsync(id);
-            if (appointment == null) return NotFound();
+            var appointment = _context.Appointments
+                .Include(a => a.User)
+                .Include(a => a.ServiceSchedule)
+                .FirstOrDefault(a => a.Id == id);
+
+            if (appointment == null)
+            {
+                return NotFound();
+            }
+
             return View(appointment);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,UserId,ServiceId,EmployeeId,DateTime,Status")] Appointment appointment)
+        public IActionResult Edit(int id, AppointmentStatus status)
         {
-            if (id != appointment.Id) return NotFound();
-            if (ModelState.IsValid)
+            var appointment = _context.Appointments.Find(id);
+            if (appointment == null)
             {
-                try
-                {
-                    _context.Update(appointment);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!_context.Appointments.Any(e => e.Id == appointment.Id)) return NotFound();
-                    else throw;
-                }
-                return RedirectToAction(nameof(Index));
+                return NotFound();
             }
-            return View(appointment);
+
+            appointment.Status = status;
+            _context.SaveChanges();
+
+            return RedirectToAction("CalendarView"); // Cambia esto al destino deseado
         }
 
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null) return NotFound();
-            var appointment = await _context.Appointments
-                .Include(a => a.User)
-                .Include(a => a.Service)
-               // .Include(a => a.Employee)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (appointment == null) return NotFound();
-            return View(appointment);
-        }
-
-        [HttpPost, ActionName("Delete")]
+        // POST: Appointment/Delete/5
+        [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public IActionResult Delete(int id)
         {
-            var appointment = await _context.Appointments.FindAsync(id);
+            var appointment = _context.Appointments.Find(id);
+            if (appointment == null)
+            {
+                return NotFound();
+            }
+
             _context.Appointments.Remove(appointment);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            _context.SaveChanges();
+
+            return RedirectToAction("CalendarView"); // Cambia esto al destino deseado
         }
     }
 }

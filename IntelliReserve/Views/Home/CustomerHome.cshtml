@@ -332,7 +332,7 @@
         let currentPage = 0;
         const rowsPerPage = 10;
 
-        function showBusinesses() {
+               function showBusinesses() {
             const tableBody = document.querySelector("#businessTable tbody");
             tableBody.innerHTML = "";
             const start = currentPage * rowsPerPage;
@@ -353,6 +353,7 @@
             document.getElementById("prevBtn").classList.toggle('disabled', currentPage === 0);
             document.getElementById("nextBtn").classList.toggle('disabled', end >= businesses.length);
         }
+
 
         function changePage(direction) {
             currentPage += direction;

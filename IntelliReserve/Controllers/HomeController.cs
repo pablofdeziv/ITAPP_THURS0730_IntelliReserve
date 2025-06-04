@@ -118,6 +118,22 @@ namespace IntelliReserve.Controllers
 
         }
 
+        [HttpGet]
+        [Route("Calendar/ServiceCalendar/{serviceId}")]
+        public IActionResult ServiceCalendar(int serviceId)
+        {
+            // Puedes filtrar los schedules por ese servicio
+            var schedules = _context.ServiceSchedules
+                .Include(s => s.Service)
+                .Where(s => s.ServiceId == serviceId)
+                .ToList();
+
+            ViewBag.ServiceId = serviceId; // para tenerlo en la vista
+            return View(schedules);
+        }
+
+
+
     }
 
 
