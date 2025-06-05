@@ -93,5 +93,18 @@ namespace IntelliReserve.Controllers
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
+
+        public IActionResult List(int serviceId)
+        {
+            var schedules = _context.ServiceSchedules
+                .Where(s => s.ServiceId == serviceId && s.StartDateTime > DateTime.Now)
+                .OrderBy(s => s.StartDateTime)
+                .ToList();
+
+            var service = _context.Services.FirstOrDefault(s => s.Id == serviceId);
+            ViewBag.ServiceName = service?.Name;
+
+            return View("SchedulesCustomer", schedules);
+        }
     }
 }

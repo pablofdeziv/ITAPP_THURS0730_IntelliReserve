@@ -49,6 +49,7 @@ namespace IntelliReserve.Controllers
             var businesses = await _context.Businesses
                 .Select(b => new
                 {
+                    id = b.Id,
                     name = b.Name,
                     address = b.Address,
                     phone = b.Phone,

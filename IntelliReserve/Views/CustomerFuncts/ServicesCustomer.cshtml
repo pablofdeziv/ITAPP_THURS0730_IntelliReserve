@@ -1,4 +1,5 @@
-﻿
+﻿@model IntelliReserve.Models.ViewModels.BusinessWithServicesViewModel
+
 
 @{
     ViewData["Title"] = "Business Services";
@@ -10,8 +11,39 @@
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.js"></script>
 
 <style>
-    .business-header {
+    .navbar-custom {
         background-color: #fff9db;
+        padding: 1rem 2rem;
+        border-bottom: 1px solid #ddd;
+        width: 100%;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 1000;
+    }
+
+    .navbar-brand {
+        font-weight: 700;
+        font-size: 1.5rem;
+        color: #333;
+    }
+
+        .navbar-brand i {
+            color: #f9c10b;
+            margin-right: 0.5rem;
+        }
+
+    .nav-link {
+        color: #333 !important;
+        font-weight: 500;
+        margin-left: 1rem;
+    }
+
+    .navbar-nav {
+        margin-left: auto;
+    }
+    .business-header {
+        background-color: white;
         padding: 2rem;
         margin-bottom: 2rem;
         border-radius: 1rem;
@@ -25,7 +57,50 @@
     #calendarModal {
         z-index: 1050;
     }
+
+    .btn-book {
+        background-color: #f9c10b;
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        font-weight: 500;
+        transition: background-color 0.3s ease;
+        display: inline-block;
+    }
+
+        .btn-book:hover {
+            background-color: #e0b105;
+            color: white;
+            text-decoration: none;
+        }
 </style>
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-custom">
+    <a class="navbar-brand" href="#"><i class="bi bi-star-fill"></i> IntelliReserve</a>
+    <div class="ms-auto d-flex align-items-center">
+        <ul class="navbar-nav me-3">
+            <li class="nav-item">
+                <a class="nav-link" asp-controller="Home" asp-action="CustomerHome">Home</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" asp-controller="Appointment" asp-action="BookingsCustomer">My Bookings</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" asp-controller="User" asp-action="Profile">My Account</a>
+            </li>
+        </ul>
+        <i class="bi bi-person-circle fs-3 me-3"></i>
+
+        <!-- Logout Button -->
+        <form method="post" asp-controller="User" asp-action="Logout">
+            <button type="submit" class="btn btn-outline-danger">
+                <i class="bi bi-box-arrow-right"></i> Logout
+            </button>
+        </form>
+    </div>
+</nav>
 
 <div class="container mt-5">
     <!-- Business Header -->
@@ -46,6 +121,8 @@
                     <p><strong>Duration:</strong> @service.Duration minutes</p>
                     <p><strong>Price:</strong> $@service.Price</p>
                     <button class="btn btn-outline-warning open-calendar" data-service-id="@service.Id" data-service-name="@service.Name">📅 View Availability</button>
+                    <a class="btn btn-warning mt-2" href="@Url.Action("List", "Schedule", new { serviceId = service.Id })">Book</a>
+
                 </div>
             </div>
         }

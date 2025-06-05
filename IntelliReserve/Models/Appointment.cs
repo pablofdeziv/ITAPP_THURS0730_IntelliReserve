@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace IntelliReserve.Models
 {
-    public enum AppointmentStatus { Pending, Confirmed, Canceled }
+    public enum AppointmentStatus { Pending,Completed, Confirmed, Canceled }
 
     public class Appointment
     {

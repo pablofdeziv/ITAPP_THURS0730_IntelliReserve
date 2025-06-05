@@ -85,5 +85,25 @@ namespace IntelliReserve.Controllers
 
             return RedirectToAction("CalendarView"); // Cambia esto al destino deseado
         }
+
+        [Authorize(Roles = "Customer")]
+        public IActionResult BookingsCustomer()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null)
+                return RedirectToAction("Login", "User");
+
+            int userId = int.Parse(userIdClaim.Value);
+
+            var appointments = _context.Appointments
+                .Include(a => a.ServiceSchedule)
+                    .ThenInclude(ss => ss.Service)
+                .Where(a => a.UserId == userId)
+                .ToList();
+
+            return View("~/Views/CustomerFuncts/BookingsCustomer.cshtml", appointments);
+
+        }
+
     }
 }

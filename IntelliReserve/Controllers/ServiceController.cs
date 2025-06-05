@@ -30,7 +30,8 @@ namespace IntelliReserve.Controllers
             if (!ModelState.IsValid)
             {
                 // Devuelve la vista con los errores de validación
-                return View(model);
+                return View("~/Views/BusinessFuncts/CreateService.cshtml", model);
+
             }
 
             // Obtener el ID del negocio del usuario logueado (asumiendo que se guarda en la BD)
@@ -41,7 +42,8 @@ namespace IntelliReserve.Controllers
             {
                 // Mostrar error si el usuario no tiene negocio asociado
                 ModelState.AddModelError("", "No associated business found for the logged-in user.");
-                return View(model);
+                return View("~/Views/BusinessFuncts/CreateService.cshtml", model);
+
             }
 
             // Crear el servicio
@@ -160,7 +162,7 @@ namespace IntelliReserve.Controllers
             return Ok(services);
         }
         [HttpGet]
-        [Route("services-by-business/{businessId}")]
+        [Route("services-customer/{businessId}")]
         public IActionResult GetServicesByBusiness(int businessId)
         {
             var business = _context.Businesses
@@ -283,6 +285,29 @@ namespace IntelliReserve.Controllers
             return View("Index", services); // o View("List", services) si tienes otra vista
         }
 
+
+
+        [HttpGet]
+        public IActionResult List(int businessId)
+        {
+            var business = _context.Businesses
+                .Include(b => b.Services)
+                    .ThenInclude(s => s.Schedules)
+                .Include(b => b.Services)
+                    .ThenInclude(s => s.AvailableDays)
+                .FirstOrDefault(b => b.Id == businessId);
+
+            if (business == null)
+                return NotFound("Business not found.");
+
+            var viewModel = new BusinessWithServicesViewModel
+            {
+                Business = business,
+                Services = business.Services.ToList()
+            };
+
+            return View("~/Views/CustomerFuncts/ServicesCustomer.cshtml", viewModel); 
+        }
 
 
     }

@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace IntelliReserve.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250602104804_Initia")]
-    partial class Initia
+    [Migration("20250603172459_InitialCreate")]
+    partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {

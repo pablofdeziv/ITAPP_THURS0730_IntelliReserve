@@ -1,0 +1,33 @@
+﻿@model List<IntelliReserve.Models.ServiceSchedule>
+
+@{
+    ViewData["Title"] = "Available Schedules";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Available Schedules for @ViewBag.ServiceName</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Start</th>
+            <th>End</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var schedule in Model)
+        {
+            <tr>
+                <td>@schedule.StartDateTime</td>
+                <td>@schedule.EndDateTime</td>
+                <td>
+                    <form asp-controller="Appointment" asp-action="Book" method="post">
+                        <input type="hidden" name="serviceScheduleId" value="@schedule.Id" />
+                        <button type="submit" class="btn btn-success">Confirm</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
