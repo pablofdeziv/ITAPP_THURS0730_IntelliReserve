@@ -97,7 +97,7 @@ namespace IntelliReserve.Controllers
         public IActionResult List(int serviceId)
         {
             var schedules = _context.ServiceSchedules
-                .Where(s => s.ServiceId == serviceId && s.StartDateTime > DateTime.Now)
+           .Where(s => s.ServiceId == serviceId && s.StartDateTime > DateTime.UtcNow)
                 .OrderBy(s => s.StartDateTime)
                 .ToList();
 
