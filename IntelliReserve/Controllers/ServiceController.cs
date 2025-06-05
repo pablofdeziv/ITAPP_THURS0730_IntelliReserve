@@ -275,15 +275,7 @@ namespace IntelliReserve.Controllers
             return RedirectToAction("HomeBusiness", "Home");
         }
 
-        [HttpGet]
-        public IActionResult List(int businessId)
-        {
-            var services = _context.Services
-                .Where(s => s.BusinessId == businessId)
-                .ToList();
-
-            return View("Index", services); // o View("List", services) si tienes otra vista
-        }
+       
 
 
 
