@@ -12,11 +12,11 @@ namespace IntelliReserve
             var builder = WebApplication.CreateBuilder(args);
 
             // Cargar las variables de entorno desde el archivo .env
-            Env.Load();
+            var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
             // Usar la variable de entorno CONNECTION_STRING para la conexión a PostgreSQL
             builder.Services.AddDbContext<AppDbContext>(options =>
-                options.UseNpgsql(Env.GetString("CONNECTION_STRING"))); // Cambiado a la variable CONNECTION_STRING
+                options.UseNpgsql(connectionString));
 
             Console.WriteLine(Env.GetString("CONNECTION_STRING"));
             // Add services to the container.

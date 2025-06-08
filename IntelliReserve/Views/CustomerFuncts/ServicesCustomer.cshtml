@@ -120,7 +120,7 @@
                     <h5>@service.Name</h5>
                     <p><strong>Duration:</strong> @service.Duration minutes</p>
                     <p><strong>Price:</strong> $@service.Price</p>
-                    <button class="btn btn-outline-warning open-calendar" data-service-id="@service.Id" data-service-name="@service.Name">📅 View Availability</button>
+                    <a class="btn btn-outline-warning" href="@Url.Action("ServiceCalendar", "ServiceSchedule", new { serviceId = service.Id })">📅 View Availability</a>
                     <a class="btn btn-warning mt-2" href="@Url.Action("List", "Schedule", new { serviceId = service.Id })">Book</a>
 
                 </div>

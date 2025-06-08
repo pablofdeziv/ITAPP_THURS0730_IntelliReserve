@@ -1,5 +1,75 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model IntelliReserve.Models.ViewModels.ServiceCalendarViewModel
+
 @{
+    ViewData["Title"] = "Disponibilidad";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
+
+@section Styles {
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.17/index.global.min.css" rel="stylesheet" />
+}
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var calendarEl = document.getElementById('calendar');
+
+            // Obtén la duración del servicio desde el modelo de Razor
+            var serviceDuration = @Model.ServiceDurationMinutes; // Esto insertará el valor numérico
+
+            // Convierte la duración de minutos a formato 'HH:mm:ss' o 'HH:mm' si es necesario para slotDuration
+            // FullCalendar puede aceptar "00:30:00" para 30 minutos.
+            // Una función simple para formatear:
+            function formatDuration(minutes) {
+                var hours = Math.floor(minutes / 60);
+                var mins = minutes % 60;
+                return (hours < 10 ? '0' : '') + hours + ':' + (mins < 10 ? '0' : '') + mins + ':00';
+            }
+
+            var formattedSlotDuration = formatDuration(serviceDuration);
+
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'timeGridWeek',
+                slotDuration: formattedSlotDuration, // ¡Aquí lo cambiamos dinámicamente!
+                allDaySlot: false,
+                height: 'auto',
+                events: '/api/services/availability/@Model.ServiceId',
+                slotMinTime: "00:00:00",
+                slotMaxTime: "24:00:00",
+                nowIndicator: true,
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'timeGridWeek,timeGridDay'
+                },
+                timeZone: 'UTC',
+                eventClick: function(info) {
+                    if (info.event.title === 'Disponible') {
+                        alert('¿Quieres reservar este horario?');
+                    }
+                }
+            });
+
+            calendar.render();
+        });
+    </script>
+}
+
+<style>
+    #calendar {
+        max-width: 900px;
+        margin: 0 auto;
+        background-color: #fff;
+        border-radius: 1rem;
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+    }
+</style>
+
+<div class="container mt-5 text-center">
+    <h2>Disponibilidad del Servicio</h2>
+</div>
+
+<div id="calendar"></div>
