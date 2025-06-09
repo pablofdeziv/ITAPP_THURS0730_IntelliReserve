@@ -130,9 +130,18 @@ namespace IntelliReserve.Controllers
 
             var duration = TimeSpan.FromMinutes(service.Duration);
 
+            //fecha acutal solo fecha
+            var todayUtc = DateTime.UtcNow.Date;
+
             // Determinar el rango de fechas para el bucle en UTC, para comparar con ServiceSchedule.StartDateTime (que es UTC)
             var loopStartDateUtc = calendarStartDateUtc.Date; // Solo la fecha en UTC
             var loopEndDateUtc = calendarEndDateUtc.Date;     // Solo la fecha en UTC
+
+
+            if (loopStartDateUtc < todayUtc)
+            {
+                loopStartDateUtc = todayUtc;
+            }
 
             // Ajustar el loopEndDateUtc para incluir el último día completamente si la hora es 00:00:00Z
             if (loopEndDateUtc > loopStartDateUtc && calendarEndDateUtc.TimeOfDay == TimeSpan.Zero)
