@@ -253,7 +253,7 @@
 
                             var form = document.createElement('form');
                             form.method = 'POST';
-                            form.action = '@Url.Action("Create", "Appointment")';
+                            form.action = '@Url.Action("BookAppointment", "Appointment")';
 
                             var hiddenField = document.createElement('input');
                             hiddenField.type = 'hidden';
@@ -315,7 +315,7 @@
 
 
 <div class="container mt-5 text-center">
-    <h2>Disponibilidad del Servicio: @Model.ServiceName</h2>
+    <h2>Service Availability: @Model.ServiceName</h2>
 </div>
 
 <div id="calendar"></div>

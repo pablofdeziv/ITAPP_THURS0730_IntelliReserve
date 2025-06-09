@@ -98,44 +98,91 @@ namespace IntelliReserve.Controllers
             return RedirectToAction("BusinessAppointments");
         }
 
-        // POST: Appointment/Delete/5 (Para cancelar una cita)
+        // POST: Appointment/Cancel (Método para cancelar una cita específica)
+        // Reutilizamos el método Delete pero lo renombramos y ajustamos para ser más semántico con "Cancelar"
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> Cancel(int id) // Recibe el ID de la cita a cancelar
         {
-            var appointment = await _context.Appointments.FindAsync(id);
+            var appointment = await _context.Appointments
+                                            .Include(a => a.ServiceSchedule) // Incluimos ServiceSchedule para redirigir
+                                            .FirstOrDefaultAsync(a => a.Id == id);
+
             if (appointment == null)
             {
+                TempData["ErrorMessage"] = "No se encontró la cita a cancelar.";
                 return NotFound();
             }
 
-            // Eliminado: Referencia a AppointmentHistory
-            // _context.AppointmentHistories.Add(new AppointmentHistory { /* ... */ });
+            // Opcional: Verificar si el usuario que intenta cancelar es el dueño de la cita
+            var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdString) || !int.TryParse(userIdString, out int userId) || appointment.UserId != userId)
+            {
+                TempData["ErrorMessage"] = "No tienes permiso para cancelar esta cita.";
+                return Forbid(); // 403 Forbidden
+            }
+
+            // Solo permitir cancelar citas futuras y confirmadas
+            if (appointment.Status != AppointmentStatus.Confirmed || appointment.ServiceSchedule.StartDateTime <= DateTime.UtcNow)
+            {
+                TempData["ErrorMessage"] = "Esta cita no puede ser cancelada (ya pasó o no está confirmada).";
+                return BadRequest();
+            }
 
             appointment.Status = AppointmentStatus.Canceled;
-            appointment.UserId = null;
-            await _context.SaveChangesAsync();
+            appointment.UserId = null; // Liberamos el slot
+            // Opcional: _context.AppointmentHistories.Add(new AppointmentHistory { /* ... */ }); si tienes un historial
 
-            TempData["SuccessMessage"] = "Cita cancelada exitosamente.";
+            try
+            {
+                await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Cita cancelada con éxito.";
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = $"Ocurrió un error al cancelar la cita: {ex.Message}";
+            }
+
+            // Redirigir a la página de reservas del cliente
             return RedirectToAction("BookingsCustomer");
         }
 
         // GET: Appointment/BookingsCustomer
         [Authorize(Roles = "Customer")]
-        public async Task<IActionResult> BookingsCustomer()
+        public async Task<IActionResult> BookingsCustomer(int page = 1, int pageSize = 10) // Añadimos paginación
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
             if (userIdClaim == null)
+            {
+                // Si el usuario no está logueado, redirigir al login
+                TempData["ErrorMessage"] = "Debes iniciar sesión para ver tus reservas.";
                 return RedirectToAction("Login", "User");
+            }
 
             int userId = int.Parse(userIdClaim.Value);
 
-            var appointments = await _context.Appointments
+            // Consulta para obtener las citas del usuario, incluyendo todas las relaciones necesarias
+            // Y filtrando para solo mostrar citas Futuras y Confirmadas.
+            var query = _context.Appointments
                 .Include(a => a.ServiceSchedule)
                     .ThenInclude(ss => ss.Service)
-                .Where(a => a.UserId == userId)
-                .OrderByDescending(a => a.ServiceSchedule.StartDateTime)
+                        .ThenInclude(s => s.Business) // <--- ¡Importante! Incluimos la información del negocio
+                .Where(a => a.UserId == userId &&
+                            a.Status == AppointmentStatus.Confirmed // Solo citas confirmadas
+                             && a.ServiceSchedule.StartDateTime > DateTime.UtcNow) // Solo citas futuras
+                .OrderBy(a => a.ServiceSchedule.StartDateTime); // Ordenamos por fecha ascendente para ver las próximas primero
+
+            // Aplicar paginación
+            var totalItems = await query.CountAsync();
+            var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+            var appointments = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
                 .ToListAsync();
+
+            ViewBag.CurrentPage = page;
+            ViewBag.TotalPages = totalPages;
+            ViewBag.PageSize = pageSize; // Pasamos pageSize a la vista por si acaso
 
             return View("~/Views/CustomerFuncts/BookingsCustomer.cshtml", appointments);
         }
@@ -162,6 +209,57 @@ namespace IntelliReserve.Controllers
                 .ToListAsync();
 
             return View("~/Views/BusinessFuncts/BusinessAppointments.cshtml", appointments);
+        }
+
+
+
+        //metodo para confirmar la reserva de un Usuario
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> BookAppointment(int serviceScheduleId) // Nuevo nombre del método
+        {
+            var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdString) || !int.TryParse(userIdString, out int userId))
+            {
+                TempData["ErrorMessage"] = "No se pudo identificar al usuario para realizar la reserva. Por favor, inicie sesión de nuevo.";
+                return RedirectToAction("Login", "User");
+            }
+
+            var serviceSchedule = await _context.ServiceSchedules
+                                                .Include(ss => ss.Appointment)
+                                                .FirstOrDefaultAsync(ss => ss.Id == serviceScheduleId);
+
+            if (serviceSchedule == null)
+            {
+                TempData["ErrorMessage"] = "El turno seleccionado no existe.";
+                return RedirectToAction("Index", "Home");
+            }
+
+            if (serviceSchedule.Appointment == null || (serviceSchedule.Appointment.UserId != null && serviceSchedule.Appointment.Status != AppointmentStatus.Canceled))
+            {
+                TempData["ErrorMessage"] = "This shift has already been booked or is unavailable..";
+                return RedirectToAction("ServiceCalendar", "Service", new { serviceId = serviceSchedule.ServiceId });
+            }
+
+            serviceSchedule.Appointment.UserId = userId;
+            serviceSchedule.Appointment.Status = AppointmentStatus.Confirmed;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Your reservation has been successfully confirmed.";
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                TempData["ErrorMessage"] = "Sorry, your appointment has just been booked. Please choose another one.";
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = $"An error occurred while processing your reservation: {ex.Message}";
+            }
+
+            return RedirectToAction("ServiceCalendar", "ServiceSchedule", new { serviceId = serviceSchedule.ServiceId });
+
         }
     }
 }
