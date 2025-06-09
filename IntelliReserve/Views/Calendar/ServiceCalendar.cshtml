@@ -7,48 +7,277 @@
 
 @section Styles {
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.17/index.global.min.css" rel="stylesheet" />
+    <style>
+
+        body {
+            padding-top: 100px; /* Ajusta este valor */
+        }
+
+        .navbar-custom {
+            background-color: #fff9db;
+            padding: 1rem 2rem;
+            border-bottom: 1px solid #ddd;
+            width: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: #333;
+        }
+
+            .navbar-brand i {
+                color: #f9c10b;
+                margin-right: 0.5rem;
+            }
+
+        .nav-link {
+            color: #333 !important;
+            font-weight: 500;
+            margin-left: 1rem;
+        }
+
+        .navbar-nav {
+            margin-left: auto;
+        }
+        /* Estilos para el contenedor principal del calendario */
+        #calendar {
+            max-width: 1000px; /* Un poco más ancho para mejor visualización */
+            margin: 2rem auto; /* Centrar y darle espacio */
+            background-color: #fff;
+            border-radius: 1rem;
+            box-shadow: 0 0.75rem 1.5rem rgba(0, 0, 0, 0.15); /* Sombra más pronunciada */
+            padding: 2rem;
+            border: 1px solid #f0f0f0; /* Borde sutil */
+        }
+
+        /* FullCalendar: Barra de herramientas (botones y título) */
+        .fc .fc-toolbar.fc-header-toolbar {
+            margin-bottom: 1.8rem; /* Más espacio debajo de la barra de herramientas */
+            padding-bottom: 1rem; /* Padding inferior para separar de la cuadrícula */
+            border-bottom: 1px solid #e0e0e0; /* Línea separadora */
+        }
+
+        /* FullCalendar: Botones de navegación (Prev, Next, Today, Vistas) */
+        .fc .fc-button-primary {
+            background-color: #f9c10b; /* Tu color amarillo principal */
+            border-color: #f9c10b;
+            color: #fff;
+            font-weight: 600;
+            padding: 0.5rem 1.2rem;
+            border-radius: 0.6rem; /* Bordes suaves */
+            transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+            text-transform: capitalize; /* Capitaliza la primera letra del texto del botón */
+        }
+
+            .fc .fc-button-primary:hover,
+            .fc .fc-button-primary:focus {
+                background-color: #e0b105; /* Tono más oscuro al pasar el ratón/enfocar */
+                border-color: #e0b105;
+                box-shadow: 0 0 0 0.25rem rgba(249, 193, 11, 0.4); /* Sombra de enfoque Bootstrap-like */
+            }
+
+            .fc .fc-button-primary:not(:disabled).fc-button-active {
+                background-color: #d8a800; /* Color cuando el botón está activo/seleccionado */
+                border-color: #d8a800;
+                box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2); /* Sombra interna para activo */
+            }
+
+        /* FullCalendar: Título del calendario (ej. "Junio 2025") */
+        .fc .fc-toolbar-title {
+            color: #333; /* Color de texto más oscuro */
+            font-weight: 700; /* Negrita */
+            font-size: 2rem; /* Tamaño más grande para el título */
+            letter-spacing: -0.02em; /* Ligero ajuste para el espaciado de letras */
+        }
+
+        /* FullCalendar: Estilo para las cabeceras de los días de la semana */
+        .fc .fc-col-header-cell-cushion {
+            padding-top: 0.75rem;
+            padding-bottom: 0.75rem;
+            color: #555;
+            font-weight: 600;
+            text-transform: uppercase; /* Pone los días de la semana en mayúsculas */
+            font-size: 0.9rem;
+        }
+
+        /* FullCalendar: Estilo para las horas en el lateral izquierdo */
+        .fc .fc-timegrid-slot-label-frame {
+            font-size: 0.95rem;
+            color: #777;
+            padding-right: 0.5rem; /* Ajusta el espacio a la derecha del texto */
+        }
+
+        /* FullCalendar: Estilo general de los eventos (slots) */
+        .fc .fc-daygrid-event,
+        .fc .fc-timegrid-event {
+            border-radius: 0.4rem; /* Bordes redondeados */
+            padding: 0.3rem 0.6rem;
+            font-size: 0.88rem;
+            border: none !important; /* Aseguramos que no haya bordes predeterminados */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* Sombra sutil para profundidad */
+            opacity: 0.95; /* Ligeramente transparente */
+            transition: opacity 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+            text-align: center; /* Centrar el texto dentro del slot */
+            color: #fff; /* Asegurar que el texto dentro del slot sea blanco */
+        }
+
+            .fc .fc-timegrid-event:hover,
+            .fc .fc-daygrid-event:hover {
+                opacity: 1; /* Opacidad completa al pasar el ratón */
+                transform: translateY(-2px); /* Pequeño levantamiento al pasar el ratón */
+                box-shadow: 0 4px 8px rgba(0,0,0,0.18); /* Sombra más pronunciada al pasar el ratón */
+            }
+
+        /* FullCalendar: Colores de eventos específicos (¡Asegúrate de que coincidan con tu backend!) */
+        /* Disponible (Verde) */
+        .fc-event[style*="background-color: #28a745"] {
+            background-color: #28a745 !important;
+            border-color: #28a745 !important;
+        }
+        /* Pendiente (Amarillo/Naranja) */
+        .fc-event[style*="background-color: #ffc107"] {
+            background-color: #ffc107 !important;
+            border-color: #ffc107 !important;
+            color: #333 !important; /* Texto oscuro para mejor contraste */
+        }
+        /* Reservado (Rojo) */
+        .fc-event[style*="background-color: #dc3545"] {
+            background-color: #dc3545 !important;
+            border-color: #dc3545 !important;
+        }
+        /* Completado (Azul) */
+        .fc-event[style*="background-color: #007bff"] {
+            background-color: #007bff !important;
+            border-color: #007bff !important;
+        }
+        /* No disponible / Estado Desconocido (Gris) */
+        .fc-event[style*="background-color: #6c757d"] {
+            background-color: #6c757d !important;
+            border-color: #6c757d !important;
+            opacity: 0.7; /* Más transparencia para indicar que no es interactivo */
+        }
+
+        /* FullCalendar: Indicador de "Ahora" */
+        .fc .fc-timegrid-now-indicator-line {
+            border-color: #f9c10b; /* Color amarillo para la línea de tiempo actual */
+            border-width: 2px; /* Línea un poco más gruesa */
+        }
+
+        .fc .fc-timegrid-now-indicator-arrow {
+            border-top-color: #f9c10b;
+        }
+
+        .fc .fc-timegrid-now-indicator-marker {
+            background-color: #f9c10b;
+        }
+
+        /* Asegurarse de que FullCalendar use la misma fuente que el resto de tu aplicación */
+        .fc {
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        /* Estilo para el título h2 de la página */
+        .container.mt-5.text-center h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 2rem;
+        }
+
+            .container.mt-5.text-center h2 span {
+                color: #f9c10b; /* Color amarillo para el nombre del servicio */
+            }
+    </style>
 }
 
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
-
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             var calendarEl = document.getElementById('calendar');
+            var serviceId = @Model.ServiceId; // Obtén el ServiceId del modelo
 
-            // Obtén la duración del servicio desde el modelo de Razor
-            var serviceDuration = @Model.ServiceDurationMinutes; // Esto insertará el valor numérico
-
-            // Convierte la duración de minutos a formato 'HH:mm:ss' o 'HH:mm' si es necesario para slotDuration
-            // FullCalendar puede aceptar "00:30:00" para 30 minutos.
-            // Una función simple para formatear:
             function formatDuration(minutes) {
                 var hours = Math.floor(minutes / 60);
                 var mins = minutes % 60;
                 return (hours < 10 ? '0' : '') + hours + ':' + (mins < 10 ? '0' : '') + mins + ':00';
             }
 
-            var formattedSlotDuration = formatDuration(serviceDuration);
+            var formattedSlotDuration = formatDuration(@Model.ServiceDurationMinutes);
 
             var calendar = new FullCalendar.Calendar(calendarEl, {
-                initialView: 'timeGridWeek',
-                slotDuration: formattedSlotDuration, // ¡Aquí lo cambiamos dinámicamente!
+                initialView: 'timeGridWeek', // Muestra una vista semanal por defecto
+                slotDuration: formattedSlotDuration,
                 allDaySlot: false,
                 height: 'auto',
-                events: '/api/services/availability/@Model.ServiceId',
+                events: function(fetchInfo, successCallback, failureCallback) {
+                    var startDate = fetchInfo.startStr;
+                    var endDate = fetchInfo.endStr;
+                    fetch(`/api/services/availability/${serviceId}?start=${startDate}&end=${endDate}`)
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Network response was not ok: ' + response.statusText);
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            successCallback(data); // Los datos ya vienen formateados para FullCalendar
+                        })
+                        .catch(error => {
+                            console.error('Error fetching events:', error);
+                            failureCallback(error); // Pasa el error a FullCalendar
+                        });
+                },
                 slotMinTime: "00:00:00",
                 slotMaxTime: "24:00:00",
                 nowIndicator: true,
                 headerToolbar: {
                     left: 'prev,next today',
                     center: 'title',
-                    right: 'timeGridWeek,timeGridDay'
+                    right: 'timeGridWeek,timeGridDay,dayGridMonth'
                 },
+                // Mantenemos 'UTC' aquí según tu código original.
+                // Si el backend envía sin 'Z' y con un desfase, el frontend no lo "sabrá" y mostrará la hora tal cual.
+                // Si quieres que FullCalendar lo interprete como local (ajustando por la zona horaria del cliente),
+                // cambia a 'local' aquí. Pero para evitar errores, lo dejo como lo tenías.
                 timeZone: 'UTC',
                 eventClick: function(info) {
-                    if (info.event.title === 'Disponible') {
-                        alert('¿Quieres reservar este horario?');
+                    if (info.event.extendedProps.isBookable) {
+                        if (confirm('¿Desea reservar este turno?')) {
+                            var serviceScheduleId = info.event.id;
+
+                            var form = document.createElement('form');
+                            form.method = 'POST';
+                            form.action = '@Url.Action("Create", "Appointment")';
+
+                            var hiddenField = document.createElement('input');
+                            hiddenField.type = 'hidden';
+                            hiddenField.name = 'serviceScheduleId';
+                            hiddenField.value = serviceScheduleId;
+                            form.appendChild(hiddenField);
+
+                            var antiForgeryInput = document.createElement('input');
+                            antiForgeryInput.type = 'hidden';
+                            antiForgeryInput.name = '__RequestVerificationToken';
+                            antiForgeryInput.value = '@Html.AntiForgeryToken()'.match(/value="([^"]*)"/)[1];
+                            form.appendChild(antiForgeryInput);
+
+                            document.body.appendChild(form);
+                            form.submit();
+                        }
+                    } else {
+                        alert('Este turno no está disponible para reserva.');
                     }
+                },
+                eventDidMount: function(info) {
+                    // Puedes añadir tooltips con detalles del appointment aquí
+                    // por ejemplo, usando una librería como Tippy.js o un simple atributo title
+                    // info.el.setAttribute('title', info.event.title);
                 }
             });
 
@@ -57,19 +286,49 @@
     </script>
 }
 
-<style>
-    #calendar {
-        max-width: 900px;
-        margin: 0 auto;
-        background-color: #fff;
-        border-radius: 1rem;
-        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
-        padding: 2rem;
-    }
-</style>
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-custom">
+    <a class="navbar-brand" href="#"><i class="bi bi-star-fill"></i> IntelliReserve</a>
+    <div class="ms-auto d-flex align-items-center">
+        <ul class="navbar-nav me-3">
+            <li class="nav-item">
+                <a class="nav-link" asp-controller="Home" asp-action="CustomerHome">Home</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" asp-controller="Appointment" asp-action="BookingsCustomer">My Bookings</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" asp-controller="User" asp-action="Profile">My Account</a>
+            </li>
+        </ul>
+        <i class="bi bi-person-circle fs-3 me-3"></i>
+
+        <!-- Logout Button -->
+        <form method="post" asp-controller="User" asp-action="Logout">
+            <button type="submit" class="btn btn-outline-danger">
+                <i class="bi bi-box-arrow-right"></i> Logout
+            </button>
+        </form>
+    </div>
+</nav>
+
 
 <div class="container mt-5 text-center">
-    <h2>Disponibilidad del Servicio</h2>
+    <h2>Disponibilidad del Servicio: @Model.ServiceName</h2>
 </div>
 
 <div id="calendar"></div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success mt-3" role="alert">
+        @TempData["SuccessMessage"]
+    </div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger mt-3" role="alert">
+        @TempData["ErrorMessage"]
+    </div>
+}

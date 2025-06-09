@@ -68,15 +68,29 @@ namespace IntelliReserve.Controllers
                 });
             }
 
-            // Agregar los horarios generados (ServiceSchedules)
             foreach (var scheduleVM in model.Schedules)
             {
-                service.Schedules.Add(new ServiceSchedule
+                var newSchedule = new ServiceSchedule
                 {
                     StartDateTime = DateTime.SpecifyKind(scheduleVM.StartDateTime, DateTimeKind.Local).ToUniversalTime(),
                     EndDateTime = DateTime.SpecifyKind(scheduleVM.EndDateTime, DateTimeKind.Local).ToUniversalTime()
+                };
 
-                });
+                // 1. Añadimos el ServiceSchedule al servicio (para que se guarde con el servicio)
+                service.Schedules.Add(newSchedule);
+
+                // 2. Creamos el Appointment y lo asociamos directamente al ServiceSchedule
+                //    usando la propiedad de navegación. EF Core resolverá el ServiceScheduleId.
+                var newAppointment = new Appointment
+                {
+                    UserId = null,
+                    Status = AppointmentStatus.Pending,
+                    ServiceSchedule = newSchedule // ¡Esto es clave para la relación!
+                };
+
+                // 3. Añadimos explícitamente el Appointment al DbContext.
+                //    Aunque ServiceSchedule es parte del grafo de Service, Appointment no lo es.
+                _context.Appointments.Add(newAppointment);
             }
 
             // Guardar en la base de datos
@@ -99,6 +113,15 @@ namespace IntelliReserve.Controllers
             if (service == null)
             {
                 return NotFound();
+            }
+
+
+            foreach (var schedule in service.Schedules)
+            {
+                if (schedule.Appointment != null)
+                {
+                    _context.Appointments.Remove(schedule.Appointment);
+                }
             }
 
             _context.ServiceSchedules.RemoveRange(service.Schedules);
@@ -233,49 +256,85 @@ namespace IntelliReserve.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-
         public IActionResult EditService(EditServiceViewModel model)
         {
             if (!ModelState.IsValid)
-                return View(model);
+            {
+               
+                return View("~/Views/BusinessFuncts/EditService.cshtml", model);
+            }
 
+            // Carga el servicio existente, incluyendo sus horarios y los appointments asociados a esos horarios.
+            // Es crucial usar .Include().ThenInclude() para cargar los Appointments.
             var service = _context.Services
                 .Include(s => s.Schedules)
+                    .ThenInclude(ss => ss.Appointment)
                 .Include(s => s.AvailableDays)
                 .FirstOrDefault(s => s.Id == model.Id);
 
             if (service == null)
+            {
                 return NotFound();
+            }
 
-            // Actualizar propiedades
+            // 1. Actualiza las propiedades directas del servicio con los nuevos valores del modelo.
             service.Name = model.Name;
             service.Duration = model.Duration;
             service.Price = model.Price;
-            service.AvailableFrom = DateTime.Today.Add(model.AvailableFrom).ToUniversalTime();
-            service.AvailableTo = DateTime.Today.Add(model.AvailableTo).ToUniversalTime();
+            // Asegura que las fechas y horas se guarden en UTC.
+            service.AvailableFrom = DateTime.SpecifyKind(DateTime.Today.Add(model.AvailableFrom), DateTimeKind.Local).ToUniversalTime();
+            service.AvailableTo = DateTime.SpecifyKind(DateTime.Today.Add(model.AvailableTo), DateTimeKind.Local).ToUniversalTime();
 
-            // Reemplazar días disponibles y horarios
-            _context.ServiceAvailabilities.RemoveRange(service.AvailableDays);
-            _context.ServiceSchedules.RemoveRange(service.Schedules);
+            // 2. Elimina los ServiceSchedules existentes y sus Appointments asociados.
+            // Es importante eliminar primero los Appointments, ya que tienen una clave foránea a ServiceSchedule.
+            foreach (var schedule in service.Schedules)
+            {
+                if (schedule.Appointment != null)
+                {
+                    _context.Appointments.Remove(schedule.Appointment);
+                }
+            }
+            _context.ServiceSchedules.RemoveRange(service.Schedules); // Elimina todos los ServiceSchedules antiguos del servicio.
+            _context.ServiceAvailabilities.RemoveRange(service.AvailableDays); // Elimina todos los AvailableDays antiguos del servicio.
 
-
+            // 3. Vuelve a crear los AvailableDays del servicio basándose en los datos del modelo.
             service.AvailableDays = model.AvailableDays.Select(day => new ServiceAvailability
             {
                 DayOfWeek = day
             }).ToList();
 
-            service.Schedules = model.Schedules.Select(s => new ServiceSchedule
+            // 4. Vuelve a crear los ServiceSchedules y sus Appointments asociados para el servicio.
+            // Esta lógica es idéntica a la que ya tienes en el método Create POST del ServiceController.
+            foreach (var scheduleVM in model.Schedules)
             {
-                StartDateTime = DateTime.SpecifyKind(s.StartDateTime, DateTimeKind.Local).ToUniversalTime(),
-                EndDateTime = DateTime.SpecifyKind(s.EndDateTime, DateTimeKind.Local).ToUniversalTime()
-            }).ToList();
+                var newSchedule = new ServiceSchedule
+                {
+                    StartDateTime = DateTime.SpecifyKind(scheduleVM.StartDateTime, DateTimeKind.Local).ToUniversalTime(),
+                    EndDateTime = DateTime.SpecifyKind(scheduleVM.EndDateTime, DateTimeKind.Local).ToUniversalTime()
+                };
 
+                // Añade el nuevo ServiceSchedule a la colección del servicio.
+                service.Schedules.Add(newSchedule);
+
+                // Crea un nuevo Appointment asociado al nuevo ServiceSchedule.
+                var newAppointment = new Appointment
+                {
+                    UserId = null, // Inicialmente sin usuario asignado.
+                    Status = AppointmentStatus.Pending, // Estado por defecto para un slot nuevo.
+                    ServiceSchedule = newSchedule // Vincula el Appointment al ServiceSchedule.
+                };
+                _context.Appointments.Add(newAppointment); // Añade el nuevo Appointment al contexto.
+            }
+
+            // Guarda todos los cambios en la base de datos (actualizaciones, eliminaciones y nuevas inserciones).
             _context.SaveChanges();
 
+            TempData["SuccessMessage"] = "Servicio actualizado correctamente.";
+            // Redirige a la página principal del negocio.
             return RedirectToAction("HomeBusiness", "Home");
         }
 
-       
+
 
 
 

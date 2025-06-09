@@ -16,5 +16,7 @@ namespace IntelliReserve.Models
         public ICollection<Notification> Notifications { get; set; }
         public ICollection<Business> Businesses { get; set; }
         public ICollection<Review> Reviews { get; set; }
+
+        public ICollection<Appointment> Appointments { get; set; } = new List<Appointment>();
     }
 }

@@ -17,33 +17,57 @@ namespace IntelliReserve.Controllers
             _context = context;
         }
 
-        // POST: Appointment/Create
+        // POST: Appointment/Create (Para realizar una reserva de un slot existente)
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Create(int serviceScheduleId)
+        public async Task<IActionResult> Create(int serviceScheduleId)
         {
-            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-
-            var appointment = new Appointment
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null)
             {
-                UserId = userId,
-                ServiceScheduleId = serviceScheduleId,
-                Status = AppointmentStatus.Pending
-            };
+                TempData["ErrorMessage"] = "Debes iniciar sesión para reservar un turno.";
+                return Unauthorized("User not logged in or ID not found.");
+            }
+            var userId = int.Parse(userIdClaim.Value);
 
-            _context.Appointments.Add(appointment);
-            _context.SaveChanges();
+            var serviceSchedule = await _context.ServiceSchedules
+                .Include(ss => ss.Appointment)
+                .FirstOrDefaultAsync(ss => ss.Id == serviceScheduleId);
 
-            return RedirectToAction("CalendarView"); // Cambia esto al destino deseado
+            if (serviceSchedule == null)
+            {
+                TempData["ErrorMessage"] = "Turno no encontrado.";
+                return NotFound("Service Schedule not found.");
+            }
+
+            if (serviceSchedule.Appointment == null ||
+                (serviceSchedule.Appointment.Status != AppointmentStatus.Pending && serviceSchedule.Appointment.Status != AppointmentStatus.Canceled) ||
+                (serviceSchedule.Appointment.Status == AppointmentStatus.Pending && serviceSchedule.Appointment.UserId != null))
+            {
+                TempData["ErrorMessage"] = "Este turno no está disponible para reserva.";
+                return BadRequest("This slot is not available for booking.");
+            }
+
+            serviceSchedule.Appointment.UserId = userId;
+            serviceSchedule.Appointment.Status = AppointmentStatus.Confirmed;
+
+            // Eliminado: Referencia a AppointmentHistory
+            // _context.AppointmentHistories.Add(new AppointmentHistory { /* ... */ });
+
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Turno reservado exitosamente.";
+            return RedirectToAction("BookingsCustomer");
         }
 
-        // GET: Appointment/Edit/5
-        public IActionResult Edit(int id)
+        // GET: Appointment/Edit/5 (Para cargar la vista de edición de una cita)
+        public async Task<IActionResult> Edit(int id)
         {
-            var appointment = _context.Appointments
+            var appointment = await _context.Appointments
                 .Include(a => a.User)
                 .Include(a => a.ServiceSchedule)
-                .FirstOrDefault(a => a.Id == id);
+                    .ThenInclude(ss => ss.Service)
+                .FirstOrDefaultAsync(a => a.Id == id);
 
             if (appointment == null)
             {
@@ -53,41 +77,52 @@ namespace IntelliReserve.Controllers
             return View(appointment);
         }
 
+        // POST: Appointment/Edit (Para cambiar el estado de una cita existente)
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(int id, AppointmentStatus status)
+        public async Task<IActionResult> Edit(int id, AppointmentStatus status)
         {
-            var appointment = _context.Appointments.Find(id);
+            var appointment = await _context.Appointments.FindAsync(id);
             if (appointment == null)
             {
                 return NotFound();
             }
+
+            // Eliminado: Referencia a AppointmentHistory
+            // _context.AppointmentHistories.Add(new AppointmentHistory { /* ... */ });
 
             appointment.Status = status;
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
-            return RedirectToAction("CalendarView"); // Cambia esto al destino deseado
+            TempData["SuccessMessage"] = "Estado de la cita actualizado exitosamente.";
+            return RedirectToAction("BusinessAppointments");
         }
 
-        // POST: Appointment/Delete/5
+        // POST: Appointment/Delete/5 (Para cancelar una cita)
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
-            var appointment = _context.Appointments.Find(id);
+            var appointment = await _context.Appointments.FindAsync(id);
             if (appointment == null)
             {
                 return NotFound();
             }
 
-            _context.Appointments.Remove(appointment);
-            _context.SaveChanges();
+            // Eliminado: Referencia a AppointmentHistory
+            // _context.AppointmentHistories.Add(new AppointmentHistory { /* ... */ });
 
-            return RedirectToAction("CalendarView"); // Cambia esto al destino deseado
+            appointment.Status = AppointmentStatus.Canceled;
+            appointment.UserId = null;
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Cita cancelada exitosamente.";
+            return RedirectToAction("BookingsCustomer");
         }
 
+        // GET: Appointment/BookingsCustomer
         [Authorize(Roles = "Customer")]
-        public IActionResult BookingsCustomer()
+        public async Task<IActionResult> BookingsCustomer()
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
             if (userIdClaim == null)
@@ -95,15 +130,38 @@ namespace IntelliReserve.Controllers
 
             int userId = int.Parse(userIdClaim.Value);
 
-            var appointments = _context.Appointments
+            var appointments = await _context.Appointments
                 .Include(a => a.ServiceSchedule)
                     .ThenInclude(ss => ss.Service)
                 .Where(a => a.UserId == userId)
-                .ToList();
+                .OrderByDescending(a => a.ServiceSchedule.StartDateTime)
+                .ToListAsync();
 
             return View("~/Views/CustomerFuncts/BookingsCustomer.cshtml", appointments);
-
         }
 
+        // GET: Appointment/BusinessAppointments (Para la vista de citas del negocio)
+        [Authorize(Roles = "BusinessOwner")]
+        public async Task<IActionResult> BusinessAppointments()
+        {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            var business = await _context.Businesses.FirstOrDefaultAsync(b => b.OwnerId == userId);
+
+            if (business == null)
+            {
+                TempData["ErrorMessage"] = "No se encontró un negocio asociado a tu cuenta.";
+                return Unauthorized("No business found for this user.");
+            }
+
+            var appointments = await _context.Appointments
+                .Include(a => a.User)
+                .Include(a => a.ServiceSchedule)
+                    .ThenInclude(ss => ss.Service)
+                .Where(a => a.ServiceSchedule.Service.BusinessId == business.Id)
+                .OrderByDescending(a => a.ServiceSchedule.StartDateTime)
+                .ToListAsync();
+
+            return View("~/Views/BusinessFuncts/BusinessAppointments.cshtml", appointments);
+        }
     }
 }

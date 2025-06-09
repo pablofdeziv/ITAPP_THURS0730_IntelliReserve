@@ -10,7 +10,9 @@ namespace IntelliReserve.Models
         public DateTime StartDateTime { get; set; }
         public DateTime EndDateTime { get; set; }
 
-        
+
+        public Appointment? Appointment { get; set; }
+
 
         [ForeignKey("ServiceId")]
         public Service Service { get; set; } = null!;

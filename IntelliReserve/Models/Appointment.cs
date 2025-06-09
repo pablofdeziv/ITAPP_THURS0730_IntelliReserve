@@ -8,13 +8,14 @@ namespace IntelliReserve.Models
     public class Appointment
     {
         public int Id { get; set; }
-        public int UserId { get; set; }
+
+        public int? UserId { get; set; }
         public int ServiceScheduleId { get; set; }
         public ServiceSchedule ServiceSchedule { get; set; }
-        public AppointmentStatus Status { get; set; }
+        public AppointmentStatus Status { get; set; } = AppointmentStatus.Pending;
 
-        public User User { get; set; }
+        public User? User { get; set; }
 
-       public ICollection<AppointmentHistory> History { get; set; }
+       
     }
 }
