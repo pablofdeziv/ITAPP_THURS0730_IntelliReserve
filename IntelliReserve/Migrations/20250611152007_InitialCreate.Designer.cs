@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace IntelliReserve.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250608162056_ConfigureAllModelRelations")]
-    partial class ConfigureAllModelRelations
+    [Migration("20250611152007_InitialCreate")]
+    partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {

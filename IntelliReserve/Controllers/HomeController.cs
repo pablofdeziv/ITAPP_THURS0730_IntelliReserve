@@ -74,10 +74,8 @@ namespace IntelliReserve.Controllers
         [HttpGet]
         public IActionResult HomeBusiness()
         {
-            // Obtener el ID del usuario logueado
             var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
-            // Buscar el negocio del usuario
             var business = _context.Businesses
                 .Include(b => b.Services)
                 .FirstOrDefault(b => b.OwnerId == userId);
@@ -87,12 +85,29 @@ namespace IntelliReserve.Controllers
                 return RedirectToAction("RegisterBusiness");
             }
 
-            // Obtener solo los servicios de esta empresa
             var services = business.Services.ToList();
 
-            // Pasar los servicios como modelo a la vista
+            // Obtener las últimas 5 reservas de sus servicios
+            var overview = _context.Appointments
+                .Include(a => a.ServiceSchedule)
+                    .ThenInclude(ss => ss.Service)
+                .Include(a => a.User)
+                .Where(a => a.ServiceSchedule.Service.BusinessId == business.Id && a.UserId != null)
+                .OrderBy(a => a.ServiceSchedule.StartDateTime)
+                .Take(5)
+                .Select(a => new
+                {
+                    ServiceName = a.ServiceSchedule.Service.Name,
+                    CustomerName = a.User.Name,
+                    Date = a.ServiceSchedule.StartDateTime
+                })
+                .ToList();
+
+            ViewBag.ScheduleOverview = overview;
+
             return View("~/Views/Home/AdminHome.cshtml", services);
         }
+
 
 
         [Route("profile-customer")]

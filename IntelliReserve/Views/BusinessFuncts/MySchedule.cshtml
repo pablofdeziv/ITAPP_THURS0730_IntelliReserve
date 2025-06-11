@@ -1,0 +1,131 @@
+﻿@using IntelliReserve.Models.ViewModels
+@model List<BusinessAppointmentViewModel>
+
+@{
+    ViewData["Title"] = "Business Schedule";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="text-center mb-10">
+    <h1 class="text-4xl font-bold text-gray-800">Your Schedule</h1>
+    <p class="text-gray-500 mt-1">Here you can see your confirmed appointments.</p>
+</div>
+
+
+<!-- Bootstrap y Bootstrap Icons -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+
+<style>
+    body {
+        font-family: 'Segoe UI', sans-serif;
+        background-color: #f9f9f9;
+        color: #333;
+        padding-top: 80px;
+    }
+
+    .navbar-custom {
+        background-color: #fff9db;
+        padding: 1rem 2rem;
+        border-bottom: 1px solid #ddd;
+        width: 100%;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 1000;
+    }
+
+    .navbar-brand {
+        font-weight: 700;
+        font-size: 1.5rem;
+        color: #333;
+    }
+
+        .navbar-brand i {
+            color: #f9c10b;
+            margin-right: 0.5rem;
+        }
+
+    .nav-link {
+        color: #333 !important;
+        font-weight: 500;
+        margin-left: 1rem;
+    }
+
+
+    .footer {
+        background-color: #fff;
+        padding: 2rem 1rem;
+        margin-top: 3rem;
+        border-top: 1px solid #ddd;
+    }
+
+        .footer a {
+            color: #333;
+            text-decoration: none;
+        }
+
+            .footer a:hover {
+                text-decoration: underline;
+            }
+</style>
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-custom">
+    <a class="navbar-brand" href="#"><i class="bi bi-star-fill"></i> IntelliReserve</a>
+    <div class="ms-auto d-flex align-items-center">
+        <ul class="navbar-nav me-3">
+            <a class="nav-link" asp-controller="Home" asp-action="HomeBusiness">Home</a>
+            <a class="nav-link" asp-controller="Business" asp-action="MySchedule">My Schedule</a>
+            <a class="nav-link" asp-controller="Business" asp-action="ProfileBusiness">My Account</a>
+        </ul>
+        <i class="bi bi-building fs-3"></i>
+
+        <!-- Logout Button -->
+        <form method="post" action="@Url.Action("Logout", "User")" class="ms-3">
+            <button type="submit" class="btn btn-outline-danger">
+                <i class="bi bi-box-arrow-right"></i> Logout
+            </button>
+        </form>
+    </div>
+</nav>
+
+<div class="container mx-auto mt-10 px-4">
+   
+    @if (Model.Count == 0)
+    {
+        <p class="text-center text-gray-600 italic">There are no bookings yet.</p>
+    }
+    else
+    {
+        <ul class="space-y-4">
+            @foreach (var item in Model.OrderBy(a => a.StartDateTime))
+            {
+                <li class="d-flex justify-content-between align-items-center flex-wrap bg-white p-4 shadow-sm rounded-lg mb-3">
+
+                    <div class="mb-2 mb-sm-0">
+                        <div class="fw-semibold fs-5 text-dark">🛠 @item.ServiceName</div>
+                        <div class="text-secondary">👤 @item.CustomerName</div>
+                        <div class="text-muted small mt-1">
+                            📅 @item.StartDateTime.ToString("dddd, MMM d, yyyy")<br />
+                            ⏰ @item.StartDateTime.ToString("h:mm tt") – @item.EndDateTime.ToString("h:mm tt")
+                        </div>
+                    </div>
+
+                    <form asp-controller="Appointment" asp-action="CancelByBusiness" method="post"
+                          onsubmit="return confirm('Are you sure you want to cancel this booking?');">
+                        <input type="hidden" name="appointmentId" value="@item.AppointmentId" />
+                        <button type="submit"
+                                class="btn btn-danger d-flex align-items-center px-3 py-2 rounded-pill">
+                            <i class="bi bi-x-circle me-2"></i>
+                            Cancel Booking
+                        </button>
+                    </form>
+
+                </li>
+
+
+            }
+        </ul>
+    }
+</div>

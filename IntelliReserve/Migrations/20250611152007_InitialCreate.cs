@@ -219,20 +219,13 @@ namespace IntelliReserve.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    UserId = table.Column<int>(type: "integer", nullable: false),
+                    UserId = table.Column<int>(type: "integer", nullable: true),
                     ServiceScheduleId = table.Column<int>(type: "integer", nullable: false),
-                    Status = table.Column<int>(type: "integer", nullable: false),
-                    ServiceId = table.Column<int>(type: "integer", nullable: false)
+                    Status = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Appointments", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Appointments_Services_ServiceId",
-                        column: x => x.ServiceId,
-                        principalTable: "Services",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Appointments_ServiceSchedules_ServiceScheduleId",
                         column: x => x.ServiceScheduleId,
@@ -244,30 +237,7 @@ namespace IntelliReserve.Migrations
                         column: x => x.UserId,
                         principalTable: "Users",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "AppointmentHistories",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    AppointmentId = table.Column<Guid>(type: "uuid", nullable: false),
-                    Timestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    StatusChange = table.Column<string>(type: "text", nullable: false),
-                    Comment = table.Column<string>(type: "text", nullable: false),
-                    AppointmentId1 = table.Column<int>(type: "integer", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AppointmentHistories", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_AppointmentHistories_Appointments_AppointmentId1",
-                        column: x => x.AppointmentId1,
-                        principalTable: "Appointments",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -293,19 +263,10 @@ namespace IntelliReserve.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_AppointmentHistories_AppointmentId1",
-                table: "AppointmentHistories",
-                column: "AppointmentId1");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Appointments_ServiceId",
-                table: "Appointments",
-                column: "ServiceId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Appointments_ServiceScheduleId",
                 table: "Appointments",
-                column: "ServiceScheduleId");
+                column: "ServiceScheduleId",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Appointments_UserId",
@@ -365,9 +326,6 @@ namespace IntelliReserve.Migrations
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "AppointmentHistories");
-
             migrationBuilder.DropTable(
                 name: "Employees");
 

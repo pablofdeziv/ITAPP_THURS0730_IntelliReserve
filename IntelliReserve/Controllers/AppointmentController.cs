@@ -261,5 +261,20 @@ namespace IntelliReserve.Controllers
             return RedirectToAction("ServiceCalendar", "ServiceSchedule", new { serviceId = serviceSchedule.ServiceId });
 
         }
+
+        [HttpPost]
+        [Authorize]
+        public IActionResult CancelByBusiness(int appointmentId)
+        {
+            var appointment = _context.Appointments.Find(appointmentId);
+            if (appointment == null)
+                return NotFound();
+
+            _context.Appointments.Remove(appointment);
+            _context.SaveChanges();
+
+            return RedirectToAction("MySchedule", "Business");
+        }
+
     }
 }
