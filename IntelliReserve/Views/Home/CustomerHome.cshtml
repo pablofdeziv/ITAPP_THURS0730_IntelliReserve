@@ -1,4 +1,5 @@
-﻿<!DOCTYPE html>
+﻿@model List<IntelliReserve.Models.Service>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -306,10 +307,28 @@
     <!-- Featured Services -->
     <section class="container mt-5">
         <h3 class="text-center mb-4">Featured Services</h3>
-        <div class="row" id="servicesContainer">
-            <!-- Service cards inserted dynamically -->
+        <div class="row">
+            @if (Model != null && Model.Any())
+            {
+                foreach (var service in Model)
+                {
+                    <div class="col-md-4 mb-4">
+                        <div class="service-card">
+                            <div class="service-title">@service.Name</div>
+                            <div class="service-detail">Duration: @service.Duration min</div>
+                            <div class="service-detail">Price: €@service.Price</div>
+                            <a href="/Calendar/ServiceCalendar/@service.Id" class="btn btn-primary">Book</a>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <p class="text-center">No recommended services found yet.</p>
+            }
         </div>
     </section>
+
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -386,7 +405,7 @@
 
         showBusinesses();
 
-        const services = [
+        /*const services = [
             { name: "Haircut", duration: "30 min", price: "€15" },
             { name: "Relaxing Massage", duration: "60 min", price: "€45" },
             { name: "Manicure", duration: "45 min", price: "€25" }
@@ -414,7 +433,7 @@
             });
         }
 
-        showServices();
+        showServices();*/
     </script>
 </body>
 
