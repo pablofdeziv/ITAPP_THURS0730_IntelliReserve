@@ -101,13 +101,52 @@ namespace IntelliReserve.Controllers
 
         }
 
-        [Route("home-customer")]
+        /*[Route("home-customer")]
         [HttpGet]
         public IActionResult CustomerHome()
         {
 
             return View("~/Views/Home/CustomerHome.cshtml"); 
 
+        }*/
+
+        [Route("home-customer")]
+        [HttpGet]
+        public async Task<IActionResult> CustomerHome()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null)
+            {
+                return RedirectToAction("Login", "Home");
+            }
+
+            int parsedUserId = int.Parse(userId);
+
+            // Obtener IDs de servicios ya reservados por este usuario
+            var previousServiceIds = await _context.Appointments
+                .Where(a => a.User.Id == parsedUserId)
+                .Select(a => a.ServiceSchedule.ServiceId)
+                .Distinct()
+                .ToListAsync();
+
+            // Obtener categorías, nombres o negocios de esos servicios
+            var previousServices = await _context.Services
+                .Where(s => previousServiceIds.Contains(s.Id))
+                .ToListAsync();
+
+            // Buscar otros servicios del mismo negocio o con nombres similares
+            var recommendedServices = await _context.Services
+                .Where(s =>
+                    !previousServiceIds.Contains(s.Id) &&
+                    (
+                        previousServices.Select(p => p.BusinessId).Contains(s.BusinessId) || 
+                        previousServices.Any(p => s.Name.Contains(p.Name.Split(' ').First()))
+                    )
+                )
+                .Take(3)
+                .ToListAsync();
+
+            return View("CustomerHome", recommendedServices);
         }
 
         [Route("profile-business")]
@@ -131,8 +170,6 @@ namespace IntelliReserve.Controllers
             ViewBag.ServiceId = serviceId; // para tenerlo en la vista
             return View(schedules);
         }
-
-
 
     }
 
