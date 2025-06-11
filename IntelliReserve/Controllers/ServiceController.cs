@@ -3,12 +3,13 @@ using IntelliReserve.Models;
 using IntelliReserve.Models.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore; // Añadir para usar async/await con EF Core
 using System.Security.Claims;
+using System.Linq; // Añadir si se usa Min/Max o otras operaciones LINQ
 
 namespace IntelliReserve.Controllers
 {
-    [Authorize]
+    [Authorize] // Asegura que solo usuarios autenticados pueden acceder a este controlador
     public class ServiceController : Controller
     {
         private readonly AppDbContext _context;
@@ -17,36 +18,34 @@ namespace IntelliReserve.Controllers
         {
             _context = context;
         }
-        // GET: Crear nuevo servicio
+
+        // --- ACCIÓN PARA CREAR UN NUEVO SERVICIO (GET) ---
+        // Simplemente muestra el formulario de creación.
+        [HttpGet] // Atributo explícito para claridad
         public IActionResult Create()
         {
-            return View();
+            return View(); // Asume que la vista se llama Create.cshtml en la carpeta Service
         }
 
+        // --- ACCIÓN PARA PROCESAR LA CREACIÓN DEL SERVICIO (POST) ---
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult Create(CreateServiceViewModel model)
+        [ValidateAntiForgeryToken] // Protección contra ataques CSRF
+        public async Task<IActionResult> Create(CreateServiceViewModel model) // Usar async Task<IActionResult>
         {
             if (!ModelState.IsValid)
             {
-                // Devuelve la vista con los errores de validación
                 return View("~/Views/BusinessFuncts/CreateService.cshtml", model);
-
             }
 
-            // Obtener el ID del negocio del usuario logueado (asumiendo que se guarda en la BD)
             var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-            var business = _context.Businesses.FirstOrDefault(b => b.OwnerId == userId);
+            var business = await _context.Businesses.FirstOrDefaultAsync(b => b.OwnerId == userId); // Usar await
 
             if (business == null)
             {
-                // Mostrar error si el usuario no tiene negocio asociado
                 ModelState.AddModelError("", "No associated business found for the logged-in user.");
                 return View("~/Views/BusinessFuncts/CreateService.cshtml", model);
-
             }
 
-            // Crear el servicio
             var service = new Service
             {
                 Name = model.Name,
@@ -59,12 +58,11 @@ namespace IntelliReserve.Controllers
                 Schedules = new List<ServiceSchedule>()
             };
 
-            // Agregar los días de disponibilidad
             foreach (var day in model.AvailableDays)
             {
                 service.AvailableDays.Add(new ServiceAvailability
                 {
-                    DayOfWeek = day
+                    DayOfWeek = day // Tu lógica original, asumiendo que 'day' ya es DayOfWeek o puede ser implícitamente convertido
                 });
             }
 
@@ -76,45 +74,38 @@ namespace IntelliReserve.Controllers
                     EndDateTime = DateTime.SpecifyKind(scheduleVM.EndDateTime, DateTimeKind.Local).ToUniversalTime()
                 };
 
-                // 1. Añadimos el ServiceSchedule al servicio (para que se guarde con el servicio)
                 service.Schedules.Add(newSchedule);
 
-                // 2. Creamos el Appointment y lo asociamos directamente al ServiceSchedule
-                //    usando la propiedad de navegación. EF Core resolverá el ServiceScheduleId.
                 var newAppointment = new Appointment
                 {
                     UserId = null,
                     Status = AppointmentStatus.Pending,
-                    ServiceSchedule = newSchedule // ¡Esto es clave para la relación!
+                    ServiceSchedule = newSchedule
                 };
-
-                // 3. Añadimos explícitamente el Appointment al DbContext.
-                //    Aunque ServiceSchedule es parte del grafo de Service, Appointment no lo es.
                 _context.Appointments.Add(newAppointment);
             }
 
-            // Guardar en la base de datos
             _context.Services.Add(service);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync(); // Usar await
 
-            // Redirigir a la lista de servicios
             return RedirectToAction("HomeBusiness", "Home");
         }
 
+        // --- ACCIÓN PARA ELIMINAR UN SERVICIO (POST) ---
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Delete(int id)
+        public async Task<IActionResult> Delete(int id) // Usar async Task<IActionResult>
         {
-            var service = _context.Services
+            var service = await _context.Services // Usar await
                 .Include(s => s.Schedules)
+                    .ThenInclude(ss => ss.Appointment) // Asegurarse de incluir Appointments
                 .Include(s => s.AvailableDays)
-                .FirstOrDefault(s => s.Id == id);
+                .FirstOrDefaultAsync(s => s.Id == id); // Usar await
 
             if (service == null)
             {
                 return NotFound();
             }
-
 
             foreach (var schedule in service.Schedules)
             {
@@ -127,39 +118,33 @@ namespace IntelliReserve.Controllers
             _context.ServiceSchedules.RemoveRange(service.Schedules);
             _context.ServiceAvailabilities.RemoveRange(service.AvailableDays);
             _context.Services.Remove(service);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync(); // Usar await
 
             return RedirectToAction("HomeBusiness", "Home");
         }
 
-
-
+        // --- ACCIÓN PARA PERFIL DE NEGOCIO (GET) ---
+        // Si esta ruta redirige a CreateService.cshtml, considera si el nombre y la vista coinciden con su propósito.
         [Route("service-business")]
         [HttpGet]
         public IActionResult ProfileBusiness()
         {
-            return View("~/Views/BusinessFuncts/CreateService.cshtml"); // Redirige a la vista de registro
-
-        }
-        [Route("edit-service-business")]
-        [HttpGet]
-        public IActionResult EditService()
-        {
-            return View("~/Views/BusinessFuncts/EditService.cshtml"); // Redirige a la vista de editar servicio }
+            return View("~/Views/BusinessFuncts/CreateService.cshtml");
         }
 
+        // --- ACCIÓN PARA OBTENER SERVICIOS DEL USUARIO LOGUEADO (API o JSON) ---
         [HttpGet]
         [Route("my-services")]
-        public IActionResult GetUserServices()
+        public async Task<IActionResult> GetUserServices() // Usar async Task<IActionResult>
         {
             var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
-            var business = _context.Businesses
+            var business = await _context.Businesses // Usar await
                 .Include(b => b.Services)
                 .ThenInclude(s => s.Schedules)
                 .Include(b => b.Services)
                 .ThenInclude(s => s.AvailableDays)
-                .FirstOrDefault(b => b.OwnerId == userId);
+                .FirstOrDefaultAsync(b => b.OwnerId == userId); // Usar await
 
             if (business == null)
             {
@@ -184,16 +169,18 @@ namespace IntelliReserve.Controllers
 
             return Ok(services);
         }
+
+        // --- ACCIÓN PARA OBTENER SERVICIOS POR ID DE NEGOCIO (API o JSON) ---
         [HttpGet]
         [Route("services-customer/{businessId}")]
-        public IActionResult GetServicesByBusiness(int businessId)
+        public async Task<IActionResult> GetServicesByBusiness(int businessId) // Usar async Task<IActionResult>
         {
-            var business = _context.Businesses
+            var business = await _context.Businesses // Usar await
                 .Include(b => b.Services)
                 .ThenInclude(s => s.Schedules)
                 .Include(b => b.Services)
                 .ThenInclude(s => s.AvailableDays)
-                .FirstOrDefault(b => b.Id == businessId);
+                .FirstOrDefaultAsync(b => b.Id == businessId); // Usar await
 
             if (business == null)
             {
@@ -218,15 +205,18 @@ namespace IntelliReserve.Controllers
 
             return Ok(services);
         }
-    
+
+        // --- ACCIÓN GET PARA MOSTRAR EL FORMULARIO DE EDICIÓN DE SERVICIO ---
+        // ESTA ES LA ACCIÓN QUE CARGARÁ LA VISTA DE EDICIÓN CON LOS DATOS.
+        // Siempre debe recibir un 'id'.
         [HttpGet]
         [Route("edit-service-business/{id}")]
-        public IActionResult EditService(int id)
+        public async Task<IActionResult> EditService(int id) // Usar async Task<IActionResult>
         {
-            var service = _context.Services
+            var service = await _context.Services // Usar await
                 .Include(s => s.Schedules)
                 .Include(s => s.AvailableDays)
-                .FirstOrDefault(s => s.Id == id);
+                .FirstOrDefaultAsync(s => s.Id == id); // Usar await
 
             if (service == null)
             {
@@ -241,8 +231,8 @@ namespace IntelliReserve.Controllers
                 Price = service.Price,
                 AvailableFrom = service.AvailableFrom.ToLocalTime().TimeOfDay,
                 AvailableTo = service.AvailableTo.ToLocalTime().TimeOfDay,
-                StartDate = service.Schedules.Min(s => s.StartDateTime).ToLocalTime().Date,
-                EndDate = service.Schedules.Max(s => s.EndDateTime).ToLocalTime().Date,
+                StartDate = service.Schedules.Any() ? service.Schedules.Min(s => s.StartDateTime).ToLocalTime().Date : DateTime.Today.Date,
+                EndDate = service.Schedules.Any() ? service.Schedules.Max(s => s.EndDateTime).ToLocalTime().Date : DateTime.Today.Date,
                 AvailableDays = service.AvailableDays.Select(d => d.DayOfWeek).ToList(),
                 Schedules = service.Schedules.Select(sc => new ServiceScheduleViewModel
                 {
@@ -254,39 +244,36 @@ namespace IntelliReserve.Controllers
             return View("~/Views/BusinessFuncts/EditService.cshtml", model);
         }
 
+        // --- ACCIÓN POST PARA PROCESAR EL ENVÍO DEL FORMULARIO DE EDICIÓN ---
         [HttpPost]
+        [Route("edit-service-business/{id}")]
         [ValidateAntiForgeryToken]
-        public IActionResult EditService(EditServiceViewModel model)
+        public async Task<IActionResult> EditService(EditServiceViewModel model) // Usar async Task<IActionResult>
         {
             if (!ModelState.IsValid)
             {
-               
                 return View("~/Views/BusinessFuncts/EditService.cshtml", model);
             }
 
-            // Carga el servicio existente, incluyendo sus horarios y los appointments asociados a esos horarios.
-            // Es crucial usar .Include().ThenInclude() para cargar los Appointments.
-            var service = _context.Services
+            var service = await _context.Services // Usar await
                 .Include(s => s.Schedules)
                     .ThenInclude(ss => ss.Appointment)
                 .Include(s => s.AvailableDays)
-                .FirstOrDefault(s => s.Id == model.Id);
+                .FirstOrDefaultAsync(s => s.Id == model.Id); // Usar await
 
             if (service == null)
             {
                 return NotFound();
             }
 
-            // 1. Actualiza las propiedades directas del servicio con los nuevos valores del modelo.
+            // 1. Actualiza las propiedades directas del servicio.
             service.Name = model.Name;
             service.Duration = model.Duration;
             service.Price = model.Price;
-            // Asegura que las fechas y horas se guarden en UTC.
             service.AvailableFrom = DateTime.SpecifyKind(DateTime.Today.Add(model.AvailableFrom), DateTimeKind.Local).ToUniversalTime();
             service.AvailableTo = DateTime.SpecifyKind(DateTime.Today.Add(model.AvailableTo), DateTimeKind.Local).ToUniversalTime();
 
             // 2. Elimina los ServiceSchedules existentes y sus Appointments asociados.
-            // Es importante eliminar primero los Appointments, ya que tienen una clave foránea a ServiceSchedule.
             foreach (var schedule in service.Schedules)
             {
                 if (schedule.Appointment != null)
@@ -294,17 +281,20 @@ namespace IntelliReserve.Controllers
                     _context.Appointments.Remove(schedule.Appointment);
                 }
             }
-            _context.ServiceSchedules.RemoveRange(service.Schedules); // Elimina todos los ServiceSchedules antiguos del servicio.
-            _context.ServiceAvailabilities.RemoveRange(service.AvailableDays); // Elimina todos los AvailableDays antiguos del servicio.
+            _context.ServiceSchedules.RemoveRange(service.Schedules);
 
-            // 3. Vuelve a crear los AvailableDays del servicio basándose en los datos del modelo.
+            // 3. Elimina los AvailableDays existentes.
+            _context.ServiceAvailabilities.RemoveRange(service.AvailableDays);
+
+            // 4. Vuelve a crear los AvailableDays del servicio basándose en los datos del modelo.
+            // Regresamos a tu lógica original, asumiendo que model.AvailableDays ya contiene DayOfWeek o string convertible.
             service.AvailableDays = model.AvailableDays.Select(day => new ServiceAvailability
             {
-                DayOfWeek = day
+                DayOfWeek = day // Tu lógica original, asumiendo que 'day' ya es DayOfWeek o puede ser implícitamente convertido
             }).ToList();
 
-            // 4. Vuelve a crear los ServiceSchedules y sus Appointments asociados para el servicio.
-            // Esta lógica es idéntica a la que ya tienes en el método Create POST del ServiceController.
+
+            // 5. Vuelve a crear los ServiceSchedules y sus Appointments asociados para el servicio.
             foreach (var scheduleVM in model.Schedules)
             {
                 var newSchedule = new ServiceSchedule
@@ -313,40 +303,33 @@ namespace IntelliReserve.Controllers
                     EndDateTime = DateTime.SpecifyKind(scheduleVM.EndDateTime, DateTimeKind.Local).ToUniversalTime()
                 };
 
-                // Añade el nuevo ServiceSchedule a la colección del servicio.
                 service.Schedules.Add(newSchedule);
 
-                // Crea un nuevo Appointment asociado al nuevo ServiceSchedule.
                 var newAppointment = new Appointment
                 {
-                    UserId = null, // Inicialmente sin usuario asignado.
-                    Status = AppointmentStatus.Pending, // Estado por defecto para un slot nuevo.
-                    ServiceSchedule = newSchedule // Vincula el Appointment al ServiceSchedule.
+                    UserId = null,
+                    Status = AppointmentStatus.Pending,
+                    ServiceSchedule = newSchedule
                 };
-                _context.Appointments.Add(newAppointment); // Añade el nuevo Appointment al contexto.
+                _context.Appointments.Add(newAppointment);
             }
 
-            // Guarda todos los cambios en la base de datos (actualizaciones, eliminaciones y nuevas inserciones).
-            _context.SaveChanges();
+            await _context.SaveChangesAsync(); // Usar await
 
             TempData["SuccessMessage"] = "Servicio actualizado correctamente.";
-            // Redirige a la página principal del negocio.
             return RedirectToAction("HomeBusiness", "Home");
         }
 
-
-
-
-
+        // --- ACCIÓN PARA MOSTRAR LISTA DE SERVICIOS PARA UN NEGOCIO (GET) ---
         [HttpGet]
-        public IActionResult List(int businessId)
+        public async Task<IActionResult> List(int businessId) // Usar async Task<IActionResult>
         {
-            var business = _context.Businesses
+            var business = await _context.Businesses // Usar await
                 .Include(b => b.Services)
                     .ThenInclude(s => s.Schedules)
                 .Include(b => b.Services)
                     .ThenInclude(s => s.AvailableDays)
-                .FirstOrDefault(b => b.Id == businessId);
+                .FirstOrDefaultAsync(b => b.Id == businessId); // Usar await
 
             if (business == null)
                 return NotFound("Business not found.");
@@ -357,9 +340,7 @@ namespace IntelliReserve.Controllers
                 Services = business.Services.ToList()
             };
 
-            return View("~/Views/CustomerFuncts/ServicesCustomer.cshtml", viewModel); 
+            return View("~/Views/CustomerFuncts/ServicesCustomer.cshtml", viewModel);
         }
-
-
     }
 }

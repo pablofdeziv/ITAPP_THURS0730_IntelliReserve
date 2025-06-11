@@ -8,8 +8,176 @@
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
 
 <style>
-    /* ... aquí va tu CSS del ejemplo anterior, igual que antes ... */
+    /* ----------------------------------------------------- */
+    /* INICIO DE ESTILOS CSS */
+    /* ----------------------------------------------------- */
+    body {
+        font-family: 'Segoe UI', sans-serif;
+        background-color: #f9f9f9;
+        color: #333;
+        padding-top: 80px;
+    }
+
+    .navbar-custom {
+        background-color: #fff9db;
+        padding: 1rem 2rem;
+        border-bottom: 1px solid #ddd;
+        width: 100%;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 1000;
+    }
+
+    .navbar-brand {
+        font-weight: 700;
+        font-size: 1.5rem;
+        color: #333;
+    }
+
+        .navbar-brand i {
+            color: #f9c10b;
+            margin-right: 0.5rem;
+        }
+
+    .nav-link {
+        color: #333 !important;
+        font-weight: 500;
+        margin-left: 1rem;
+    }
+
+    .container {
+        margin-top: 3rem;
+        padding-bottom: 3rem;
+    }
+
+    .section-title {
+        font-size: 2.2rem;
+        font-weight: 700;
+        color: #333;
+        text-align: center;
+        margin-bottom: 2.5rem;
+        padding-top: 1rem;
+    }
+
+    .form-section {
+        background-color: #fff;
+        border-radius: 1rem;
+        box-shadow: 0 0.75rem 1.5rem rgba(0, 0, 0, 0.15);
+        padding: 2.5rem;
+        border: 1px solid #f0f0f0;
+        max-width: 700px;
+        margin: 0 auto;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #555;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-control, .btn {
+        border-radius: 0.6rem;
+    }
+
+    /* CAMBIADO: Botón Generar Horarios ahora es btn-primary */
+    .btn-primary {
+        background-color: #f9c10b; /* Color amarillo */
+        border-color: #f9c10b;
+        color: #333; /* Texto oscuro para el botón amarillo */
+    }
+
+        .btn-primary:hover {
+            background-color: #e0ac00; /* Un tono más oscuro al pasar el ratón */
+            border-color: #e0ac00;
+            color: #333;
+        }
+
+    .btn-success {
+        background-color: #28a745;
+        border-color: #28a745;
+    }
+
+        .btn-success:hover {
+            background-color: #218838;
+            border-color: #1e7e34;
+        }
+
+    .btn-secondary {
+        background-color: #6c757d;
+        border-color: #6c757d;
+    }
+
+        .btn-secondary:hover {
+            background-color: #5a6268;
+            border-color: #545b62;
+        }
+
+    /* Estilos para los horarios generados */
+    .schedules-container {
+        border: 1px solid #eee;
+        border-radius: 0.5rem;
+        padding: 1.5rem;
+        background-color: #fdfdfd;
+        max-height: 400px;
+        overflow-y: auto;
+        margin-top: 1rem;
+    }
+
+    .schedule-entry {
+        background-color: #e9ecef;
+        border-radius: 0.5rem;
+        padding: 0.75rem 1rem;
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+        .schedule-entry p {
+            margin-bottom: 0;
+            font-size: 0.9rem;
+        }
+
+    .remove-btn {
+        cursor: pointer;
+        color: #dc3545;
+        font-weight: 600;
+        transition: color 0.2s ease;
+    }
+
+        .remove-btn:hover {
+            color: #c82333;
+            text-decoration: underline;
+        }
+
+    /* MEJORA: Estilo de checkboxes con Bootstrap */
+    .form-check-inline {
+        margin-right: 1rem;
+        margin-bottom: 0.5rem;
+    }
+    /* ----------------------------------------------------- */
+    /* FIN DE ESTILOS CSS */
+    /* ----------------------------------------------------- */
 </style>
+
+<nav class="navbar navbar-expand-lg navbar-custom">
+    <a class="navbar-brand" href="#"><i class="bi bi-star-fill"></i> IntelliReserve</a>
+    <div class="ms-auto d-flex align-items-center">
+        <ul class="navbar-nav me-3">
+            <li class="nav-item"><a class="nav-link active" href="home-business">Home</a></li>
+            <li class="nav-item"><a class="nav-link" href="#">My Schedule</a></li>
+            <a class="nav-link" asp-controller="Business" asp-action="ProfileBusiness">My Account</a>
+        </ul>
+        <i class="bi bi-building fs-3"></i>
+
+        <form method="post" action="@Url.Action("Logout", "User")" class="ms-3">
+            <button type="submit" class="btn btn-outline-danger">
+                <i class="bi bi-box-arrow-right"></i> Logout
+            </button>
+        </form>
+    </div>
+</nav>
 
 <div class="container">
     <div class="section-title">Edit Service</div>
@@ -20,24 +188,34 @@
             <div class="mb-3">
                 <label asp-for="Name" class="form-label">Service Name</label>
                 <input asp-for="Name" class="form-control" required />
+                <span asp-validation-for="Name" class="text-danger"></span>
             </div>
 
             <div class="mb-3">
                 <label asp-for="Duration" class="form-label">Duration (minutes)</label>
                 <input asp-for="Duration" type="number" min="1" class="form-control" required />
+                <span asp-validation-for="Duration" class="text-danger"></span>
             </div>
 
             <div class="mb-3">
                 <label asp-for="Price" class="form-label">Price (€)</label>
                 <input asp-for="Price" type="number" step="0.01" min="0" class="form-control" required />
+                <span asp-validation-for="Price" class="text-danger"></span>
             </div>
 
             <div class="mb-3">
                 <label class="form-label">Select Days</label>
                 <div>
-                    @foreach (var day in Enum.GetNames(typeof(DayOfWeek)))
+                    @foreach (var dayString in Enum.GetNames(typeof(DayOfWeek)))
                     {
-                        <input type="checkbox" name="AvailableDays" value="@day" /> @day
+                        DayOfWeek currentDayEnum;
+                        var isParsed = Enum.TryParse(dayString, out currentDayEnum);
+                        var isChecked = isParsed && Model.AvailableDays != null && Model.AvailableDays.Contains(currentDayEnum);
+
+                        <div class="form-check form-check-inline">
+                            <input type="checkbox" class="form-check-input" name="AvailableDays" id="day-@dayString" value="@dayString" @(isChecked ? "checked" : "") />
+                            <label class="form-check-label" for="day-@dayString">@dayString</label>
+                        </div>
                     }
                 </div>
             </div>
@@ -47,9 +225,11 @@
                 <div class="row">
                     <div class="col-md-6">
                         <input asp-for="AvailableFrom" type="time" class="form-control" required />
+                        <span asp-validation-for="AvailableFrom" class="text-danger"></span>
                     </div>
                     <div class="col-md-6">
                         <input asp-for="AvailableTo" type="time" class="form-control" required />
+                        <span asp-validation-for="AvailableTo" class="text-danger"></span>
                     </div>
                 </div>
             </div>
@@ -57,15 +237,17 @@
             <div class="mb-3">
                 <label asp-for="StartDate" class="form-label">Start Date</label>
                 <input asp-for="StartDate" type="date" class="form-control" required />
+                <span asp-validation-for="StartDate" class="text-danger"></span>
             </div>
 
             <div class="mb-3">
                 <label asp-for="EndDate" class="form-label">End Date</label>
                 <input asp-for="EndDate" type="date" class="form-control" required />
+                <span asp-validation-for="EndDate" class="text-danger"></span>
             </div>
 
             <div class="d-flex align-items-center gap-2 mb-3">
-                <button type="button" class="btn btn-outline-primary" onclick="generateSchedules()">Generate Schedules</button>
+                <button type="button" class="btn btn-primary" onclick="generateSchedules()">Generate Schedules</button>
 
                 <button class="btn btn-outline-secondary d-flex align-items-center justify-content-center p-2" type="button"
                         data-bs-toggle="collapse" data-bs-target="#scheduleCollapse" aria-expanded="false" aria-controls="scheduleCollapse"
@@ -76,7 +258,36 @@
 
             <div id="scheduleCollapse" class="collapse">
                 <h5 class="mt-4">Service Schedules</h5>
-                <div id="schedules-container" class="schedules-container"></div>
+                <div id="schedules-container" class="schedules-container">
+                    @* Precargar los horarios existentes del modelo *@
+                    @if (Model.Schedules != null && Model.Schedules.Any())
+                    {
+                        @for (int i = 0; i < Model.Schedules.Count; i++)
+                        {
+                            var schedule = Model.Schedules[i];
+                            var startDateDisplay = schedule.StartDateTime.ToString("yyyy-MM-dd HH:mm");
+                            var endDateDisplay = schedule.EndDateTime.ToString("HH:mm");
+
+                            // Asegúrate de que el formato ISO sea correcto para los hidden inputs (con segundos)
+                            var startDateTimeISO = schedule.StartDateTime.ToString("yyyy-MM-ddTHH:mm:ss");
+                            var endDateTimeISO = schedule.EndDateTime.ToString("yyyy-MM-ddTHH:mm:ss");
+
+                            <div class="schedule-entry mb-3 border p-2">
+                                <div class="row align-items-center">
+                                    <div class="col-10">
+                                        <strong>Schedule @(i + 1):</strong>
+                                        <p><b>Day:</b> @schedule.StartDateTime.DayOfWeek | <b>Start:</b> @startDateDisplay | <b>End:</b> @endDateDisplay</p>
+                                        <input type="hidden" name="Schedules[@i].StartDateTime" value="@startDateTimeISO" />
+                                        <input type="hidden" name="Schedules[@i].EndDateTime" value="@endDateTimeISO" />
+                                    </div>
+                                    <div class="col-2 text-end">
+                                        <span class="remove-btn" onclick="removeSchedule(this)">Remove</span>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
             </div>
 
             <div class="mt-4">
@@ -89,58 +300,70 @@
 
 @section Scripts {
     <script>
+        // Variable global para llevar la cuenta de los horarios.
+        // Se inicializa con la cantidad de horarios precargados.
+        let scheduleIndex = @(Model.Schedules != null ? Model.Schedules.Count : 0);
+
         function generateSchedules() {
             const duration = parseInt(document.getElementById('Duration').value);
-            const startTime = document.getElementById('AvailableFrom').value;
-            const endTime = document.getElementById('AvailableTo').value;
+            const startTimeStr = document.getElementById('AvailableFrom').value;
+            const endTimeStr = document.getElementById('AvailableTo').value;
 
             const selectedDays = Array.from(document.querySelectorAll('input[name="AvailableDays"]:checked'))
                 .map(checkbox => checkbox.value);
 
-            const startDate = document.getElementById('StartDate').value;
-            const endDate = document.getElementById('EndDate').value;
+            const startDateStr = document.getElementById('StartDate').value;
+            const endDateStr = document.getElementById('EndDate').value;
 
-            if (selectedDays.length === 0 || !startTime || !endTime || isNaN(duration)) {
-                alert('Please select days, set a valid time range, duration, and start/end dates.');
+            // Validación inicial más completa y mensaje en español
+            if (selectedDays.length === 0 || !startTimeStr || !endTimeStr || isNaN(duration) || !startDateStr || !endDateStr) {
+                alert('Por favor, selecciona días, establece un rango de horas válido, duración y fechas de inicio/fin.');
                 return;
             }
 
             const schedulesContainer = document.getElementById('schedules-container');
-            schedulesContainer.innerHTML = '';
+            schedulesContainer.innerHTML = ''; // Limpiar schedules anteriores al generar nuevos
+            scheduleIndex = 0; // Reiniciar el índice para nuevos horarios si se regeneran
 
             document.getElementById("scheduleCollapse").classList.add("show");
             document.getElementById("toggle-icon").textContent = '▲';
 
-            const [startHour, startMinute] = startTime.split(':').map(Number);
-            const [endHour, endMinute] = endTime.split(':').map(Number);
+            const [startHour, startMinute] = startTimeStr.split(':').map(Number);
+            const [endHour, endMinute] = endTimeStr.split(':').map(Number);
 
-            const startDateObj = new Date(startDate);
-            const endDateObj = new Date(endDate);
-
-            let scheduleIndex = 0;
+            const startDateObj = new Date(startDateStr);
+            const endDateObj = new Date(endDateStr);
 
             selectedDays.forEach(day => {
                 let currentDate = new Date(startDateObj);
+                currentDate.setHours(0, 0, 0, 0); // Resetear la hora para asegurar comparaciones de fecha consistentes
 
-                while (currentDate <= endDateObj) {
+                while (currentDate.getTime() <= endDateObj.getTime()) {
                     if (currentDate.getDay() === getDayOfWeek(day)) {
-                        let currentHour = startHour;
-                        let currentMinute = startMinute;
+                        let currentSlotStart = new Date(currentDate);
+                        currentSlotStart.setHours(startHour, startMinute, 0, 0);
 
-                        while (currentHour < endHour || (currentHour === endHour && currentMinute < endMinute)) {
-                            const year = currentDate.getFullYear();
-                            const month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
-                            const dayOfMonth = currentDate.getDate().toString().padStart(2, '0');
-                            const hourStr = currentHour.toString().padStart(2, '0');
-                            const minuteStr = currentMinute.toString().padStart(2, '0');
+                        let dailyEndBoundary = new Date(currentDate);
+                        dailyEndBoundary.setHours(endHour, endMinute, 0, 0);
 
-                            const startDateTimeISO = `${year}-${month}-${dayOfMonth}T${hourStr}:${minuteStr}`;
+                        while (true) {
+                            let currentSlotEnd = new Date(currentSlotStart.getTime() + duration * 60 * 1000);
 
-                            const endDateTimeObj = new Date(`${startDateTimeISO}`);
-                            endDateTimeObj.setMinutes(endDateTimeObj.getMinutes() + duration);
-                            const endHourStr = endDateTimeObj.getHours().toString().padStart(2, '0');
-                            const endMinuteStr = endDateTimeObj.getMinutes().toString().padStart(2, '0');
-                            const endDateTimeISO = `${year}-${month}-${dayOfMonth}T${endHourStr}:${endMinuteStr}`;
+                            if (currentSlotEnd.getTime() > dailyEndBoundary.getTime()) {
+                                break;
+                            }
+
+                            const year = currentSlotStart.getFullYear();
+                            const month = (currentSlotStart.getMonth() + 1).toString().padStart(2, '0');
+                            const dayOfMonth = currentSlotStart.getDate().toString().padStart(2, '0');
+                            const startHourDisp = currentSlotStart.getHours().toString().padStart(2, '0');
+                            const startMinuteDisp = currentSlotStart.getMinutes().toString().padStart(2, '0');
+
+                            const endHourDisp = currentSlotEnd.getHours().toString().padStart(2, '0');
+                            const endMinuteDisp = currentSlotEnd.getMinutes().toString().padStart(2, '0');
+
+                            const startDateTimeISO = `${year}-${month}-${dayOfMonth}T${startHourDisp}:${startMinuteDisp}:00`;
+                            const endDateTimeISO = `${year}-${month}-${dayOfMonth}T${endHourDisp}:${endMinuteDisp}:00`;
 
                             const scheduleEntry = document.createElement('div');
                             scheduleEntry.classList.add('schedule-entry', 'mb-3', 'border', 'p-2');
@@ -148,11 +371,11 @@
                                 <div class="row align-items-center">
                                     <div class="col-10">
                                         <strong>Schedule ${scheduleIndex + 1}:</strong>
-                                        <p><b>Day:</b> ${day} | <b>Start:</b> ${startDateTimeISO} | <b>End:</b> ${endDateTimeISO}</p>
+                                        <p><b>Day:</b> ${day} | <b>Start:</b> ${startDateTimeISO.substring(0, 10)} ${startDateTimeISO.substring(11, 16)} | <b>End:</b> ${endDateTimeISO.substring(11, 16)}</p>
                                         <input type="hidden" name="Schedules[${scheduleIndex}].StartDateTime" value="${startDateTimeISO}" />
                                         <input type="hidden" name="Schedules[${scheduleIndex}].EndDateTime" value="${endDateTimeISO}" />
                                     </div>
-                                    <div class="col-2">
+                                    <div class="col-2 text-end">
                                         <span class="remove-btn" onclick="removeSchedule(this)">Remove</span>
                                     </div>
                                 </div>`;
@@ -160,11 +383,7 @@
                             schedulesContainer.appendChild(scheduleEntry);
                             scheduleIndex++;
 
-                            currentMinute += duration;
-                            if (currentMinute >= 60) {
-                                currentMinute -= 60;
-                                currentHour += 1;
-                            }
+                            currentSlotStart = currentSlotEnd;
                         }
                     }
                     currentDate.setDate(currentDate.getDate() + 1);
@@ -174,13 +393,8 @@
 
         function getDayOfWeek(day) {
             const daysOfWeek = {
-                "Sunday": 0,
-                "Monday": 1,
-                "Tuesday": 2,
-                "Wednesday": 3,
-                "Thursday": 4,
-                "Friday": 5,
-                "Saturday": 6
+                "Sunday": 0, "Monday": 1, "Tuesday": 2, "Wednesday": 3,
+                "Thursday": 4, "Friday": 5, "Saturday": 6
             };
             return daysOfWeek[day] ?? -1;
         }
@@ -189,5 +403,34 @@
             const scheduleEntry = button.closest('.schedule-entry');
             scheduleEntry.remove();
         }
+
+        // Lógica para precargar datos y mostrar schedules al cargar la página
+        document.addEventListener('DOMContentLoaded', function() {
+            // Precargar checkboxes de días
+            // Serializamos los DayOfWeek del modelo a string para que JS los pueda consumir.
+            const availableDaysFromModel = @Html.Raw(Json.Serialize(Model.AvailableDays?.Select(d => d.ToString())));
+            if (availableDaysFromModel && availableDaysFromModel.length > 0) {
+                availableDaysFromModel.forEach(dayString => {
+                    const checkbox = document.getElementById(`day-${dayString}`);
+                    if (checkbox) {
+                        checkbox.checked = true;
+                    }
+                });
+            }
+
+            const schedulesCount = @(Model.Schedules != null ? Model.Schedules.Count : 0);
+            if (schedulesCount > 0) {
+                document.getElementById("scheduleCollapse").classList.add("show");
+                document.getElementById("toggle-icon").textContent = '▲';
+            }
+        });
+
+        document.getElementById('scheduleCollapse').addEventListener('show.bs.collapse', function () {
+            document.getElementById('toggle-icon').textContent = '▲';
+        });
+
+        document.getElementById('scheduleCollapse').addEventListener('hide.bs.collapse', function () {
+            document.getElementById('toggle-icon').textContent = '▼';
+        });
     </script>
 }

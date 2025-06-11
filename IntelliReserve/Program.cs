@@ -2,6 +2,8 @@ using IntelliReserve.Data;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using DotNetEnv; // Asegúrate de que tienes este namespace
+using Microsoft.AspNetCore.Localization;
+using System.Globalization;
 
 namespace IntelliReserve
 {
@@ -18,6 +20,24 @@ namespace IntelliReserve
             builder.Services.AddDbContext<AppDbContext>(options =>
                 options.UseNpgsql(connectionString));
 
+
+            //PRECIO DECIMAL CON ,
+            builder.Services.Configure<RequestLocalizationOptions>(options =>
+            {
+                var supportedCultures = new[] { new CultureInfo("en-US") }; // Forzar el uso del punto como separador decimal
+                options.DefaultRequestCulture = new RequestCulture("en-US"); // Establecer 'en-US' como cultura por defecto
+                options.SupportedCultures = supportedCultures;
+                options.SupportedUICultures = supportedCultures;
+                options.ApplyCurrentCultureToResponseHeaders = true; // Aplicar esta cultura a las respuestas
+            });
+            // Opcional: Personalizar el mensaje de error de validación para números
+            builder.Services.Configure<Microsoft.AspNetCore.Mvc.MvcOptions>(options =>
+            {
+                options.ModelBindingMessageProvider.SetValueMustBeANumberAccessor(
+                    (name) => $"El campo '{name}' debe ser un número válido (usa punto como separador decimal).");
+            });
+
+
             Console.WriteLine(Env.GetString("CONNECTION_STRING"));
             // Add services to the container.
             builder.Services.AddControllersWithViews();
@@ -31,6 +51,9 @@ namespace IntelliReserve
                 });
 
             var app = builder.Build();
+
+
+            app.UseRequestLocalization();
 
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
