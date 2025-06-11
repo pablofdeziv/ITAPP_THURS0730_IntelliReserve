@@ -109,15 +109,15 @@
     <div class="row align-items-start">
         <!-- Columna 1 -->
         <div class="col-md-4">
-            <div class="card p-4">
+            <div class="card p-4 mb-4">
                 <h5 class="card-title">Booking Statistics</h5>
                 <canvas id="bookingChart" height="200"></canvas>
-                <ul class="list-group list-group-flush mt-3">
-                    <li class="list-group-item">Total Bookings: <strong>1234</strong></li>
-                    <li class="list-group-item">Active Bookings: <strong>492</strong></li>
-                    <li class="list-group-item">Cancelled: <strong>56</strong></li>
-                </ul>
+                <hr />
+                <p><strong>Total Bookings:</strong> @ViewBag.BookingStats.TotalBookings</p>
+                <p><strong>Active Bookings:</strong> @ViewBag.BookingStats.ActiveBookings</p>
+                <p><strong>Cancelled:</strong> @ViewBag.BookingStats.CancelledBookings</p>
             </div>
+
 
             <div class="card p-4">
                 <h5 class="card-title">Service Management</h5>
@@ -206,14 +206,17 @@
 <!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+    const labels = @Html.Raw(Json.Serialize(ViewBag.BookingStats.Labels));
+    const data = @Html.Raw(Json.Serialize(ViewBag.BookingStats.MonthlyCounts));
+
     const bookingCtx = document.getElementById('bookingChart').getContext('2d');
     new Chart(bookingCtx, {
         type: 'line',
         data: {
-            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
+            labels: labels,
             datasets: [{
                 label: 'Bookings',
-                data: [200, 300, 250, 400, 450],
+                data: data,
                 borderColor: '#f9c10b',
                 backgroundColor: 'rgba(249, 193, 11, 0.2)',
                 fill: true,
@@ -247,3 +250,4 @@
         }
     });
 </script>
+

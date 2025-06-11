@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Security.Claims;
 using System.Security.Principal;
 using System.Linq; // ¡Asegúrate de que esta línea esté presente!
+using IntelliReserve.Models.ViewModels;
 
 
 namespace IntelliReserve.Controllers
@@ -70,29 +71,73 @@ namespace IntelliReserve.Controllers
             return View("~/Views/Account/RegisterBusiness.cshtml"); // Redirige a la vista de registro
        
         }
+
+
         [Route("home-business")]
         [HttpGet]
         public IActionResult HomeBusiness()
         {
-            // Obtener el ID del usuario logueado
             var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
-            // Buscar el negocio del usuario
             var business = _context.Businesses
                 .Include(b => b.Services)
                 .FirstOrDefault(b => b.OwnerId == userId);
 
             if (business == null)
-            {
                 return RedirectToAction("RegisterBusiness");
+
+            var serviceIds = business.Services.Select(s => s.Id).ToList();
+
+            var appointments = _context.Appointments
+                .Include(a => a.ServiceSchedule)
+                .Where(a => serviceIds.Contains(a.ServiceSchedule.ServiceId))
+                .ToList();
+
+            /*foreach (var a in appointments)
+            {
+                Console.WriteLine($"ID: {a.Id} | Fecha: {a.ServiceSchedule.StartDateTime.ToShortDateString()} | Estado: {a.Status}");
             }
+            Console.WriteLine($"TOTAL RESERVAS: {appointments.Count}");*/
 
-            // Obtener solo los servicios de esta empresa
-            var services = business.Services.ToList();
 
-            // Pasar los servicios como modelo a la vista
-            return View("~/Views/Home/AdminHome.cshtml", services);
+            // Ventana dinámica: 3 meses antes, actual y 2 después
+            var currentMonth = DateTime.Now.Month;
+            var currentYear = DateTime.Now.Year;
+            var months = Enumerable.Range(-3, 6)
+                .Select(offset => new DateTime(currentYear, currentMonth, 1).AddMonths(offset))
+                .ToList();
+
+            var counts = months.Select(m =>
+                appointments.Count(a =>
+                    (a.Status == AppointmentStatus.Confirmed ||
+                    a.Status == AppointmentStatus.Completed ||
+                    a.Status == AppointmentStatus.Canceled) &&
+                    a.ServiceSchedule.StartDateTime.Year == m.Year &&
+                    a.ServiceSchedule.StartDateTime.Month == m.Month
+                )
+            ).ToList();
+
+
+            var labels = months.Select(m => m.ToString("MMM")).ToList();
+
+            var stats = new BookingStatisticsViewModel
+            {
+                Labels = labels,
+                MonthlyCounts = counts,
+                TotalBookings = appointments.Count(a =>
+                    a.Status == AppointmentStatus.Confirmed ||
+                    a.Status == AppointmentStatus.Completed ||
+                    a.Status == AppointmentStatus.Canceled
+                ),
+                ActiveBookings = appointments.Count(a => a.Status == AppointmentStatus.Confirmed),
+                CancelledBookings = appointments.Count(a => a.Status == AppointmentStatus.Canceled)
+            };
+
+            ViewBag.BookingStats = stats;
+
+            return View("~/Views/Home/AdminHome.cshtml", business.Services.ToList());
         }
+
 
 
         [Route("profile-customer")]
