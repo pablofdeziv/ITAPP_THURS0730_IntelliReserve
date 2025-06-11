@@ -5,6 +5,8 @@ using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
 using System.Security.Claims;
 using System.Security.Principal;
+using System.Linq; // ¡Asegúrate de que esta línea esté presente!
+
 
 namespace IntelliReserve.Controllers
 {
@@ -107,7 +109,7 @@ namespace IntelliReserve.Controllers
         {
 
             return View("~/Views/Home/CustomerHome.cshtml"); 
-
+        
         }*/
 
         [Route("home-customer")]
@@ -122,32 +124,60 @@ namespace IntelliReserve.Controllers
 
             int parsedUserId = int.Parse(userId);
 
-            // Obtener IDs de servicios ya reservados por este usuario
+            // 1. Obtener IDs de servicios ya reservados por este usuario
             var previousServiceIds = await _context.Appointments
                 .Where(a => a.User.Id == parsedUserId)
                 .Select(a => a.ServiceSchedule.ServiceId)
                 .Distinct()
                 .ToListAsync();
 
-            // Obtener categorías, nombres o negocios de esos servicios
-            var previousServices = await _context.Services
+            // 2. Obtener los IDs de negocios de los servicios previos
+            //    Esto se hace en la base de datos
+            var previousBusinessIds = await _context.Services
                 .Where(s => previousServiceIds.Contains(s.Id))
+                .Select(s => s.BusinessId)
+                .Distinct()
                 .ToListAsync();
 
-            // Buscar otros servicios del mismo negocio o con nombres similares
-            var recommendedServices = await _context.Services
+            // 3. Obtener las primeras palabras de los nombres de los servicios previos
+            //    Esto se hace en la base de datos y luego se procesa en memoria
+            var firstWordsOfPreviousServiceNames = await _context.Services
+                .Where(s => previousServiceIds.Contains(s.Id))
+                .Select(s => s.Name)
+                .ToListAsync(); // <-- Traemos los nombres a memoria
+                
+            var processedFirstWords = firstWordsOfPreviousServiceNames
+                .Select(name => name.Split(' ').FirstOrDefault())
+                .Where(word => !string.IsNullOrEmpty(word))
+                .ToList();
+
+
+            // 4. Obtener una lista inicial de servicios candidatos de la base de datos.
+            //    Filtramos por los que NO han sido reservados y que pertenecen a los mismos negocios.
+            var candidateServicesQuery = _context.Services
                 .Where(s =>
-                    !previousServiceIds.Contains(s.Id) &&
-                    (
-                        previousServices.Select(p => p.BusinessId).Contains(s.BusinessId) || 
-                        previousServices.Any(p => s.Name.Contains(p.Name.Split(' ').First()))
-                    )
+                    !previousServiceIds.Contains(s.Id) && // Que no sean servicios que ya haya reservado
+                    (previousBusinessIds.Any() && previousBusinessIds.Contains(s.BusinessId)) // Del mismo negocio
+                );
+
+            // 5. Traer los servicios candidatos a memoria para aplicar el filtro de nombres.
+            var candidateServices = await candidateServicesQuery.ToListAsync(); // <-- ¡Aquí se ejecuta la consulta a DB!
+
+
+            // 6. Ahora, aplicar el filtro de nombres en memoria.
+            //    Filtramos entre los servicios candidatos aquellos cuyos nombres contengan alguna de las primeras palabras.
+            var recommendedServices = candidateServices
+                .Where(s =>
+                    processedFirstWords.Any() && // Solo si hay palabras para buscar
+                    processedFirstWords.Any(firstWord => s.Name.Contains(firstWord))
                 )
-                .Take(3)
-                .ToListAsync();
+                .Take(3) // Tomar hasta 3 servicios recomendados
+                .ToList(); // Convertir a lista final
 
             return View("CustomerHome", recommendedServices);
         }
+
+
 
         [Route("profile-business")]
         [HttpGet]
