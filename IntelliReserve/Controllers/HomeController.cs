@@ -124,57 +124,59 @@ namespace IntelliReserve.Controllers
 
             int parsedUserId = int.Parse(userId);
 
-            // 1. Obtener IDs de servicios ya reservados por este usuario
+            // 1. IDs de servicios ya reservados
             var previousServiceIds = await _context.Appointments
                 .Where(a => a.User.Id == parsedUserId)
                 .Select(a => a.ServiceSchedule.ServiceId)
                 .Distinct()
                 .ToListAsync();
 
-            // 2. Obtener los IDs de negocios de los servicios previos
-            //    Esto se hace en la base de datos
-            var previousBusinessIds = await _context.Services
+            // 2. Servicios previos (para nombre y negocio)
+            var previousServices = await _context.Services
                 .Where(s => previousServiceIds.Contains(s.Id))
-                .Select(s => s.BusinessId)
-                .Distinct()
                 .ToListAsync();
 
-            // 3. Obtener las primeras palabras de los nombres de los servicios previos
-            //    Esto se hace en la base de datos y luego se procesa en memoria
-            var firstWordsOfPreviousServiceNames = await _context.Services
-                .Where(s => previousServiceIds.Contains(s.Id))
-                .Select(s => s.Name)
-                .ToListAsync(); // <-- Traemos los nombres a memoria
-                
-            var processedFirstWords = firstWordsOfPreviousServiceNames
-                .Select(name => name.Split(' ').FirstOrDefault())
-                .Where(word => !string.IsNullOrEmpty(word))
+            var previousBusinessIds = previousServices
+                .Select(s => s.BusinessId)
+                .Distinct()
                 .ToList();
 
+            var processedFirstWords = previousServices
+                .Select(s => s.Name.Split(' ').FirstOrDefault())
+                .Where(word => !string.IsNullOrEmpty(word))
+                .Distinct()
+                .ToList();
 
-            // 4. Obtener una lista inicial de servicios candidatos de la base de datos.
-            //    Filtramos por los que NO han sido reservados y que pertenecen a los mismos negocios.
-            var candidateServicesQuery = _context.Services
+            // 3. Recomendaciones del mismo negocio
+            var sameBusinessServices = await _context.Services
                 .Where(s =>
-                    !previousServiceIds.Contains(s.Id) && // Que no sean servicios que ya haya reservado
-                    (previousBusinessIds.Any() && previousBusinessIds.Contains(s.BusinessId)) // Del mismo negocio
-                );
-
-            // 5. Traer los servicios candidatos a memoria para aplicar el filtro de nombres.
-            var candidateServices = await candidateServicesQuery.ToListAsync(); // <-- ¡Aquí se ejecuta la consulta a DB!
-
-
-            // 6. Ahora, aplicar el filtro de nombres en memoria.
-            //    Filtramos entre los servicios candidatos aquellos cuyos nombres contengan alguna de las primeras palabras.
-            var recommendedServices = candidateServices
-                .Where(s =>
-                    processedFirstWords.Any() && // Solo si hay palabras para buscar
-                    processedFirstWords.Any(firstWord => s.Name.Contains(firstWord))
+                    !previousServiceIds.Contains(s.Id) &&
+                    previousBusinessIds.Contains(s.BusinessId)
                 )
-                .Take(3) // Tomar hasta 3 servicios recomendados
-                .ToList(); // Convertir a lista final
+                .ToListAsync();
 
-            return View("CustomerHome", recommendedServices);
+            // 4. Recomendaciones por nombre similar (sin importar el negocio)
+            var similarNameServices = await _context.Services
+                .Where(s =>
+                    !previousServiceIds.Contains(s.Id)
+                )
+                .ToListAsync();
+
+            similarNameServices = similarNameServices
+                .Where(s =>
+                    processedFirstWords.Any(word => s.Name.Contains(word))
+                )
+                .ToList();
+
+            // 5. Unir y quitar duplicados
+            var allRecommended = sameBusinessServices
+                .Concat(similarNameServices)
+                .GroupBy(s => s.Id)
+                .Select(g => g.First())
+                .Take(3)
+                .ToList();
+
+            return View("CustomerHome", allRecommended);
         }
 
 
