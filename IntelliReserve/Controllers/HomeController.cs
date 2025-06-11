@@ -143,7 +143,7 @@ namespace IntelliReserve.Controllers
                 .Include(a => a.ServiceSchedule)
                     .ThenInclude(ss => ss.Service)
                 .Include(a => a.User)
-                .Where(a => a.ServiceSchedule.Service.BusinessId == business.Id && a.UserId != null)
+                .Where(a => a.ServiceSchedule.Service.BusinessId == business.Id && a.UserId != null && a.ServiceSchedule.StartDateTime >= DateTime.UtcNow)
                 .OrderBy(a => a.ServiceSchedule.StartDateTime)
                 .Take(5)
                 .Select(a => new

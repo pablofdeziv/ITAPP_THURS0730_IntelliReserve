@@ -246,11 +246,13 @@ namespace IntelliReserve.Controllers
             if (business == null)
                 return NotFound();
 
+            var currentDateTime = DateTime.UtcNow;
+
             var appointments = await _context.Appointments
                 .Include(a => a.ServiceSchedule)
                     .ThenInclude(ss => ss.Service)
                 .Include(a => a.User)
-                .Where(a => a.ServiceSchedule.Service.BusinessId == business.Id && a.UserId != null)
+                .Where(a => a.ServiceSchedule.Service.BusinessId == business.Id && a.UserId != null && a.ServiceSchedule.StartDateTime >= currentDateTime)
                 .Select(a => new BusinessAppointmentViewModel
                 {
                     ServiceName = a.ServiceSchedule.Service.Name,
@@ -259,6 +261,7 @@ namespace IntelliReserve.Controllers
                     CustomerName = a.User.Name,
                     AppointmentId = a.Id
                 })
+                .OrderBy(a => a.StartDateTime)
                 .ToListAsync();
 
             return View("~/Views/BusinessFuncts/MySchedule.cshtml", appointments);
