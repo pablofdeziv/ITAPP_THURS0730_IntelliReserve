@@ -317,7 +317,7 @@
                             <div class="service-title">@service.Name</div>
                             <div class="service-detail">Duration: @service.Duration min</div>
                             <div class="service-detail">Price: €@service.Price</div>
-                            <a href="/Calendar/ServiceCalendar/@service.Id" class="btn btn-primary">Book</a>
+                            <a class="btn btn-outline-warning" href="@Url.Action("ServiceCalendar", "ServiceSchedule", new { serviceId = service.Id })">Book</a>
                         </div>
                     </div>
                 }
