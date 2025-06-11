@@ -4,6 +4,7 @@ using IntelliReserve.Data;
 using IntelliReserve.Models;
 using System.Security.Claims;
 using IntelliReserve.Helpers;
+using IntelliReserve.Models.ViewModels;
 
 namespace IntelliReserve.Controllers
 {
@@ -233,6 +234,36 @@ namespace IntelliReserve.Controllers
             TempData["SuccessMessage"] = "Business profile updated properly.";
             return RedirectToAction("ProfileBusiness", "Business");
         }
+
+        [HttpGet]
+        public async Task<IActionResult> MySchedule()
+        {
+            int ownerId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            var business = await _context.Businesses
+                .FirstOrDefaultAsync(b => b.OwnerId == ownerId);
+
+            if (business == null)
+                return NotFound();
+
+            var appointments = await _context.Appointments
+                .Include(a => a.ServiceSchedule)
+                    .ThenInclude(ss => ss.Service)
+                .Include(a => a.User)
+                .Where(a => a.ServiceSchedule.Service.BusinessId == business.Id && a.UserId != null)
+                .Select(a => new BusinessAppointmentViewModel
+                {
+                    ServiceName = a.ServiceSchedule.Service.Name,
+                    StartDateTime = a.ServiceSchedule.StartDateTime.ToLocalTime(),
+                    EndDateTime = a.ServiceSchedule.EndDateTime.ToLocalTime(),
+                    CustomerName = a.User.Name,
+                    AppointmentId = a.Id
+                })
+                .ToListAsync();
+
+            return View("~/Views/BusinessFuncts/MySchedule.cshtml", appointments);
+        }
+
 
 
     }

@@ -89,8 +89,7 @@
     <div class="ms-auto d-flex align-items-center">
         <ul class="navbar-nav me-3">
             <li class="nav-item"><a class="nav-link active" href="home-business">Home</a></li>
-            <li class="nav-item"><a class="nav-link" href="#">My Schedule</a></li>
-
+            <a class="nav-link" asp-controller="Business" asp-action="MySchedule">My Schedule</a>
             <a class="nav-link" asp-controller="Business" asp-action="ProfileBusiness">My Account</a>
         </ul>
         <i class="bi bi-building fs-3"></i>
@@ -176,13 +175,14 @@
             <div class="card p-4 mb-4">
                 <h5 class="card-title">Schedule Overview</h5>
                 <ul class="list-group list-group-flush">
-                    <li class="list-group-item">📅 Team Meeting - Jan 12, 2023</li>
-                    <li class="list-group-item">📅 Client Presentation - Jan 15, 2023</li>
-                    <li class="list-group-item">📅 Weekly Review - Jan 17, 2023</li>
-                    <li class="list-group-item">📅 Team Meeting - Jan 12, 2023</li>
-                    <li class="list-group-item">📅 Client Presentation - Jan 15, 2023</li>
-                    <li class="list-group-item">📅 Weekly Review - Jan 17, 2023</li>
+                    @foreach (var item in ViewBag.ScheduleOverview)
+                    {
+                        <li class="list-group-item">
+                            <strong>@item.ServiceName</strong>👤 @item.CustomerName – @((item.Date as DateTime?)?.ToString("MMM dd, yyyy h:mm tt"))
+                        </li>
+                    }
                 </ul>
+
             </div>
 
             <div class="card p-4">

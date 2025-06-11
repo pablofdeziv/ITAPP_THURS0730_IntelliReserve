@@ -171,8 +171,8 @@
     <a class="navbar-brand" href="#"><i class="bi bi-star-fill"></i> IntelliReserve</a>
     <div class="ms-auto d-flex align-items-center">
         <ul class="navbar-nav me-3">
-            <li class="nav-item"><a class="nav-link active" href="home-business">Home</a></li>
-            <li class="nav-item"><a class="nav-link" href="#">My Schedule</a></li>
+            <a class="nav-link" asp-controller="Home" asp-action="HomeBusiness">Home</a>
+            <a class="nav-link" asp-controller="Business" asp-action="MySchedule">My Schedule</a>
             <a class="nav-link" asp-controller="Business" asp-action="ProfileBusiness">My Account</a>
         </ul>
         <i class="bi bi-building fs-3"></i>

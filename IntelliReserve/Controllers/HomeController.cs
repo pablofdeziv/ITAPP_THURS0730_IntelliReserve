@@ -135,6 +135,27 @@ namespace IntelliReserve.Controllers
 
             ViewBag.BookingStats = stats;
 
+            
+            var services = business.Services.ToList();
+
+            // Obtener las últimas 5 reservas de sus servicios
+            var overview = _context.Appointments
+                .Include(a => a.ServiceSchedule)
+                    .ThenInclude(ss => ss.Service)
+                .Include(a => a.User)
+                .Where(a => a.ServiceSchedule.Service.BusinessId == business.Id && a.UserId != null)
+                .OrderBy(a => a.ServiceSchedule.StartDateTime)
+                .Take(5)
+                .Select(a => new
+                {
+                    ServiceName = a.ServiceSchedule.Service.Name,
+                    CustomerName = a.User.Name,
+                    Date = a.ServiceSchedule.StartDateTime
+                })
+                .ToList();
+
+            ViewBag.ScheduleOverview = overview;
+
             return View("~/Views/Home/AdminHome.cshtml", business.Services.ToList());
         }
 
