@@ -1,6 +1,6 @@
 # IntelliReserve🧠
 
-> University project for the course *IT Applications – Electronic Media in Business & Commerce* (4th year Computer Engineering)
+> University project for the course *IT Applications – Electronic Media in Business & Commerce*
 
 **IntelliReserve** is a web-based booking and scheduling platform tailored for small businesses. It supports user and employee management, service configuration, appointment scheduling, payments, and customer feedback.
 
